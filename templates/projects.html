@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+{% load static format_currency %}
+{% block content %}
+<!-- Верхняя панель -->
+<div class="topbar">
+    <div class="search-bar">
+        <img src="{% static 'icons/search.svg' %}" alt="Поиск" class="icon">
+        <input type="text" placeholder="Поиск">
+    </div>
+    <button class="add-project-btn">Добавить новый проект</button>
+    <div class="profile-bar">
+        <img src="{% static 'icons/avatar.png' %}" alt="Аватар" class="avatar">
+        <span class="username" title="Имя пользователя">Максим Е.</span>
+        <div class="profile-actions">
+            <img src="{% static 'icons/edit.svg' %}" alt="Редактировать" class="icon-btn">
+            <img src="{% static 'icons/logout.svg' %}" alt="Выход" class="icon-btn">
+        </div>
+    </div>
+</div>
+<h1>Мои проекты</h1>
+<div class="kanban-board">
+    <!-- Колонка: К выполнению -->
+    <div class="kanban-column" data-status="planned">
+        <div class="kanban-column-header">
+            <h2>К выполнению</h2>
+        </div>
+        <div class="kanban-cards">
+            {% for project in projects %}
+                {% if project.status == 'planned' %}
+                    <div class="project-card" draggable="true" data-project-id="{{ project.id }}">
+                        <div class="title">{{ project.title }}</div>
+                        <div class="deadline">Дедлайн: {{ project.end_date|default:"—" }}</div>
+                        <div class="client">{{ project.client_name|default:"—" }}</div>
+                        <div class="cost">{{ project.budget|format_currency|default:"—" }}</div>
+                        <div class="payment-status {{ project.payment_status|default:'not-paid' }}">
+                            {{ project.get_payment_status_display|default:"Не оплачен" }}
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    <!-- Колонка: В работе -->
+    <div class="kanban-column" data-status="inwork">
+        <div class="kanban-column-header">
+            <h2>В работе</h2>
+        </div>
+        <div class="kanban-cards">
+            {% for project in projects %}
+                {% if project.status == 'inwork' %}
+                    <div class="project-card" draggable="true" data-project-id="{{ project.id }}">
+                        <div class="title">{{ project.title }}</div>
+                        <div class="deadline">Дедлайн: {{ project.end_date|default:"—" }}</div>
+                        <div class="client">{{ project.client_name|default:"—" }}</div>
+                        <div class="cost">{{ project.budget|format_currency|default:"—" }}</div>
+                        <div class="payment-status {{ project.payment_status|default:'not-paid' }}">
+                            {{ project.get_payment_status_display|default:"Не оплачен" }}
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    <!-- Колонка: Завершён -->
+    <div class="kanban-column" data-status="done">
+        <div class="kanban-column-header">
+            <h2>Завершён</h2>
+        </div>
+        <div class="kanban-cards">
+            {% for project in projects %}
+                {% if project.status == 'done' %}
+                    <div class="project-card" draggable="true" data-project-id="{{ project.id }}">
+                        <div class="title">{{ project.title }}</div>
+                        <div class="deadline">Дедлайн: {{ project.end_date|default:"—" }}</div>
+                        <div class="client">{{ project.client_name|default:"—" }}</div>
+                        <div class="cost">{{ project.budget|format_currency|default:"—" }}</div>
+                        <div class="payment-status {{ project.payment_status|default:'not-paid' }}">
+                            {{ project.get_payment_status_display|default:"Не оплачен" }}
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    <!-- Колонка: Просрочен -->
+    <div class="kanban-column" data-status="overdue">
+        <div class="kanban-column-header">
+            <h2>Просрочен</h2>
+        </div>
+        <div class="kanban-cards">
+            {% for project in projects %}
+                {% if project.status == 'overdue' %}
+                    <div class="project-card" draggable="true" data-project-id="{{ project.id }}">
+                        <div class="title">{{ project.title }}</div>
+                        <div class="deadline">Дедлайн: {{ project.end_date|default:"—" }}</div>
+                        <div class="client">{{ project.client_name|default:"—" }}</div>
+                        <div class="cost">{{ project.budget|format_currency|default:"—" }}</div>
+                        <div class="payment-status {{ project.payment_status|default:'not-paid' }}">
+                            {{ project.get_payment_status_display|default:"Не оплачен" }}
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    <!-- Колонка: Приостановлен -->
+    <div class="kanban-column" data-status="paused">
+        <div class="kanban-column-header">
+            <h2>Приостановлен</h2>
+        </div>
+        <div class="kanban-cards">
+            {% for project in projects %}
+                {% if project.status == 'paused' %}
+                    <div class="project-card" draggable="true" data-project-id="{{ project.id }}">
+                        <div class="title">{{ project.title }}</div>
+                        <div class="deadline">Дедлайн: {{ project.end_date|default:"—" }}</div>
+                        <div class="client">{{ project.client_name|default:"—" }}</div>
+                        <div class="cost">{{ project.budget|format_currency|default:"—" }}</div>
+                        <div class="payment-status {{ project.payment_status|default:'not-paid' }}">
+                            {{ project.get_payment_status_display|default:"Не оплачен" }}
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+</div>
+<script src="{% static 'kanban.js' %}"></script>
+{% endblock %}

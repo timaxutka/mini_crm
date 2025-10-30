@@ -1,0 +1,13 @@
+body { background:#0b0b0b; color:#eaeaea; font-family:Inter, Arial, sans-serif; }
+.sidebar { width:220px; position:fixed; left:0; top:0; bottom:0; background:#0f0f0f; padding:24px; }
+.main-content { margin-left:240px; padding:24px; }
+.projects-board { display:flex; gap:16px; flex-wrap:wrap; }
+.project-card { width:220px; background:#121212; border:1px solid #262626; padding:16px; border-radius:8px; text-decoration:none;color:inherit; }
+.project-card .pc-price { font-size:18px; font-weight:700; margin-top:12px; }
+.project-page { display:flex; gap:24px; }
+.project-info { width:380px; background:#0f0f0f; padding:16px; border-radius:8px; border:1px solid #222; }
+.tasks-board { flex:1; display:flex; gap:16px; }
+.col { width:33%; background:#0f0f0f; padding:12px; border-radius:8px; }
+.list { min-height:200px; }
+.task-card { background:#141414; padding:10px; border-radius:6px; margin-bottom:8px; border:1px solid #232323; }
+.btn { display:inline-block; padding:8px 12px; background:#ffd84d; color:#000; border-radius:6px; text-decoration:none; }

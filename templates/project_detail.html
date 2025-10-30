@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="project-page">
+  <aside class="project-info">
+    <h2>{{ project.title }}</h2>
+    <p>Клиент: {{ project.client }}</p>
+    <p>Статус: {{ project.get_status_display }}</p>
+    <p>Сроки: {{ project.start_date }} — {{ project.deadline }}</p>
+    <p>Стоимость: {{ project.price }} ₽</p>
+    <p>{{ project.description }}</p>
+    <a class="btn" href="{% url 'project_add' %}">Редактировать</a>
+  </aside>
+
+  <section class="tasks-board">
+    <div class="col" id="col-todo">
+      <h3>К выполнению</h3>
+      <div class="list" data-status="todo">
+        {% for t in tasks_todo %}
+          <div class="task-card" data-id="{{ t.id }}">{{ t.title }}</div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="col" id="col-inwork">
+      <h3>В работе</h3>
+      <div class="list" data-status="inwork">
+        {% for t in tasks_inwork %}
+          <div class="task-card" data-id="{{ t.id }}">{{ t.title }}</div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="col" id="col-done">
+      <h3>Завершено</h3>
+      <div class="list" data-status="done">
+        {% for t in tasks_done %}
+          <div class="task-card" data-id="{{ t.id }}">{{ t.title }}</div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}
