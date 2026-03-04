@@ -31,7 +31,7 @@
                      data-project-id="{{ project.id }}">
                     <div class="title">{{ project.title }}</div>
                     <div class="deadline">Дедлайн: {{ project.end_date|default:"—" }}</div>
-                    <div class="client">{{ project.client_name|default:"—" }}</div>
+                    <div class="client">{{ project.client.name|default:"Нет клиента" }}</div>
                     <div class="cost">{{ project.budget|format_currency|default:"—" }}</div>
                     <div class="payment-status {{ project.payment_status|default:'not-paid' }}">
                         {{ project.get_payment_status_display|default:"Не оплачен" }}
@@ -51,7 +51,7 @@
                      data-project-id="{{ project.id }}">
                     <div class="title">{{ project.title }}</div>
                     <div class="deadline">Дедлайн: {{ project.end_date|default:"—" }}</div>
-                    <div class="client">{{ project.client_name|default:"—" }}</div>
+                    <div class="client">{{ project.client.name|default:"Нет клиента" }}</div>
                     <div class="cost">{{ project.budget|format_currency|default:"—" }}</div>
                     <div class="payment-status {{ project.payment_status|default:'not-paid' }}">
                         {{ project.get_payment_status_display|default:"Не оплачен" }}
@@ -71,7 +71,7 @@
                      data-project-id="{{ project.id }}">
                     <div class="title">{{ project.title }}</div>
                     <div class="deadline">Дедлайн: {{ project.end_date|default:"—" }}</div>
-                    <div class="client">{{ project.client_name|default:"—" }}</div>
+                    <div class="client">{{ project.client.name|default:"Нет клиента" }}</div>
                     <div class="cost">{{ project.budget|format_currency|default:"—" }}</div>
                     <div class="payment-status {{ project.payment_status|default:'not-paid' }}">
                         {{ project.get_payment_status_display|default:"Не оплачен" }}
@@ -91,7 +91,7 @@
                      data-project-id="{{ project.id }}">
                     <div class="title">{{ project.title }}</div>
                     <div class="deadline">Дедлайн: {{ project.end_date|default:"—" }}</div>
-                    <div class="client">{{ project.client_name|default:"—" }}</div>
+                    <div class="client">{{ project.client.name|default:"Нет клиента" }}</div>
                     <div class="cost">{{ project.budget|format_currency|default:"—" }}</div>
                     <div class="payment-status {{ project.payment_status|default:'not-paid' }}">
                         {{ project.get_payment_status_display|default:"Не оплачен" }}
@@ -111,7 +111,7 @@
                      data-project-id="{{ project.id }}">
                     <div class="title">{{ project.title }}</div>
                     <div class="deadline">Дедлайн: {{ project.end_date|default:"—" }}</div>
-                    <div class="client">{{ project.client_name|default:"—" }}</div>
+                    <div class="client">{{ project.client.name|default:"Нет клиента" }}</div>
                     <div class="cost">{{ project.budget|format_currency|default:"—" }}</div>
                     <div class="payment-status {{ project.payment_status|default:'not-paid' }}">
                         {{ project.get_payment_status_display|default:"Не оплачен" }}

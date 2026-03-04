@@ -1,5 +1,57 @@
 {% extends 'base.html' %}
-
 {% block content %}
-<h1>Страница: Задачи</h1>
+<div class="content">
+    <div class="topbar">
+        <h1>Мои задачи</h1>
+        <div style="flex-grow: 1;"></div>
+        <button class="add-project-btn">+ Новая задача</button>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+        
+        <div class="project-card" style="padding: 20px; border: 1px solid #191919;">
+            <h3 style="margin-bottom: 20px; color: #808080; font-size: 14px; text-transform: uppercase;">В работе</h3>
+            
+            {% for task in active_tasks %}
+            <div style="display: flex; align-items: flex-start; gap: 15px; padding: 15px; border-bottom: 1px solid #191919; transition: 0.3s;" onmouseover="this.style.backgroundColor='#161616'" onmouseout="this.style.backgroundColor='transparent'">
+                <input type="checkbox" style="margin-top: 5px; cursor: pointer;">
+                
+                <div style="flex-grow: 1;">
+                    <div style="font-weight: 500; margin-bottom: 4px;">{{ task.title }}</div>
+                    <div style="font-size: 12px; color: #808080;">
+                        <span style="color: #7A5AF8;">{{ task.project.title }}</span> 
+                        • {{ task.project.client.name|default:"Без клиента" }}
+                    </div>
+                </div>
+
+                <div style="text-align: right;">
+                    <div style="font-size: 12px; font-weight: 600; {% if task in overdue_tasks %}color: #F04438;{% else %}color: #5FBE6F;{% endif %}">
+                        {{ task.due_date|date:"d M"|default:"Без даты" }}
+                    </div>
+                    <div style="font-size: 10px; color: #555;">Дедлайн</div>
+                </div>
+            </div>
+            {% empty %}
+            <div style="padding: 40px; text-align: center; color: #444;">Все задачи выполнены! Отдыхай 🍹</div>
+            {% endfor %}
+        </div>
+
+        <div>
+            <div class="project-card" style="padding: 20px; border: 1px solid #191919; margin-bottom: 20px;">
+                <h3 style="color: #808080; font-size: 12px; text-transform: uppercase; margin-bottom: 15px;">Прогресс дня</h3>
+                <div style="font-size: 24px; font-weight: bold; color: #fff;">{{ completed_tasks|length }} / {{ active_tasks|length|add:completed_tasks|length }}</div>
+                <div style="font-size: 12px; color: #555; margin-top: 5px;">задач завершено сегодня</div>
+            </div>
+
+            <div class="project-card" style="padding: 20px; border: 1px solid #191919; opacity: 0.6;">
+                <h3 style="color: #808080; font-size: 12px; text-transform: uppercase; margin-bottom: 15px;">Недавно закрыты</h3>
+                {% for task in completed_tasks %}
+                <div style="font-size: 13px; margin-bottom: 8px; text-decoration: line-through; color: #555;">
+                    {{ task.title }}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

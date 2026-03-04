@@ -3,8 +3,10 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.db import transaction
 import json
+from django.db.models import Sum, Q, Count, Prefetch
+from django.utils import timezone
 
-from .models import Project
+from .models import Project, Client, Task
 
 
 def projects(request):
@@ -21,11 +23,27 @@ def projects(request):
         'paused': paused,
     })
 
-def clients(request):
-    return render(request, 'clients.html')
+def client_projects_view(request):
+    # Получаем все проекты, подтягивая данные клиентов одним запросом
+    # Сортируем сначала по имени клиента, потом по дате проекта
+    all_projects = Project.objects.select_related('client').all().order_by('client__name', '-start_date')
+    
+    return render(request, 'clients.html', {'projects': all_projects})
 
 def tasks(request):
-    return render(request, 'tasks.html')
+    all_tasks = Task.objects.select_related('project', 'project__client').all()
+    
+    # Сортируем просто по дате создания
+    active_tasks = all_tasks.exclude(status='done').order_by('-created_at')
+    # Так как поля due_date нет, мы не можем высчитать просроченные
+    overdue_tasks = [] 
+    completed_tasks = all_tasks.filter(status='done').order_by('-id')[:10]
+
+    return render(request, 'tasks.html', {
+        'active_tasks': active_tasks,
+        'overdue_tasks': overdue_tasks,
+        'completed_tasks': completed_tasks,
+    })
 
 def finance(request):
     return render(request, 'finance.html')
@@ -85,3 +103,4 @@ def project_detail(request, project_id):
         'tasks_inwork': tasks.filter(status='inwork'),
         'tasks_done': tasks.filter(status='done'),
     })
+

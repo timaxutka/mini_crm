@@ -1,5 +1,75 @@
 {% extends 'base.html' %}
-
 {% block content %}
-<h1>Страница: Клиенты</h1>
+<div class="content">
+    <div class="topbar">
+        <h1>Проекты по клиентам</h1>
+        <div style="flex-grow: 1;"></div>
+        <button class="add-project-btn">+ Новый клиент</button>
+    </div>
+
+    <div class="project-card" style="padding: 0; overflow: hidden; border: 1px solid #191919; background-color: #111;">
+        <table style="width: 100%; border-collapse: collapse; color: white; text-align: left;">
+            <thead>
+                <tr style="background-color: #0D0D0D; color: #808080; font-size: 12px; text-transform: uppercase;">
+                    <th style="padding: 20px; width: 20%;">Клиент</th>
+                    <th style="padding: 20px; width: 30%;">Проект</th>
+                    <th style="padding: 20px; width: 15%;">Статус</th>
+                    <th style="padding: 20px; width: 15%;">Бюджет</th>
+                    <th style="padding: 20px; width: 20%;">Оплата</th>
+                </tr>
+            </thead>
+            <tbody style="font-size: 14px;">
+                {% for project in projects %}
+                <tr style="border-bottom: 1px solid #191919; transition: background 0.2s;" onmouseover="this.style.backgroundColor='#161616'" onmouseout="this.style.backgroundColor='transparent'">
+                    
+                    <td style="padding: 20px;">
+                        <div style="font-weight: 600; color: #fff;">
+                            {{ project.client.name|default:"Без клиента" }}
+                        </div>
+                        {% if project.client.is_vip %}
+                            <span style="color: #FEC84B; font-size: 10px;">★ VIP</span>
+                        {% endif %}
+                    </td>
+
+                    <td style="padding: 20px;">
+                        <a href="{% url 'project_detail' project.id %}" style="color: #7A5AF8; text-decoration: none; font-weight: 500; display: block; margin-bottom: 4px;">
+                            {{ project.title }}
+                        </a>
+                        <span style="font-size: 11px; color: #555;">Создан: {{ project.start_date|date:"d.m.Y" }}</span>
+                    </td>
+
+                    <td style="padding: 20px;">
+                        <span style="padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 500; border: 1px solid;
+                            {% if project.status == 'done' %} background: rgba(95,190,111,0.1); color: #5FBE6F; border-color: #5FBE6F;
+                            {% elif project.status == 'inwork' %} background: rgba(122,90,248,0.1); color: #7A5AF8; border-color: #7A5AF8;
+                            {% elif project.status == 'overdue' %} background: rgba(240,68,56,0.1); color: #F04438; border-color: #F04438;
+                            {% else %} background: rgba(128,128,128,0.1); color: #808080; border-color: #808080; {% endif %}">
+                            {{ project.get_status_display }}
+                        </span>
+                    </td>
+
+                    <td style="padding: 20px; font-weight: 600;">
+                        {{ project.budget|default:"0" }} ₽
+                    </td>
+
+                    <td style="padding: 20px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <div style="width: 8px; height: 8px; border-radius: 50%; background-color: {% if project.payment_status == 'paid' %}#5FBE6F{% else %}#F04438{% endif %};"></div>
+                            <span style="color: {% if project.payment_status == 'paid' %}#5FBE6F{% else %}#F04438{% endif %};">
+                                {{ project.get_payment_status_display }}
+                            </span>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" style="padding: 40px; text-align: center; color: #666;">
+                        Проектов пока нет. Добавьте первый проект и привяжите его к клиенту.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
 {% endblock %}
