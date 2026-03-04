@@ -1,43 +1,116 @@
 {% extends 'base.html' %}
+{% load static format_currency %}
 {% block content %}
-<div class="project-page">
-  <aside class="project-info">
-    <h2>{{ project.title }}</h2>
-    <p>Клиент: {{ project.client }}</p>
-    <p>Статус: {{ project.get_status_display }}</p>
-    <p>Сроки: {{ project.start_date }} — {{ project.deadline }}</p>
-    <p>Стоимость: {{ project.price }} ₽</p>
-    <p>{{ project.description }}</p>
-    <a class="btn" href="{% url 'project_add' %}">Редактировать</a>
-  </aside>
 
-  <section class="tasks-board">
-    <div class="col" id="col-todo">
-      <h3>К выполнению</h3>
-      <div class="list" data-status="todo">
-        {% for t in tasks_todo %}
-          <div class="task-card" data-id="{{ t.id }}">{{ t.title }}</div>
-        {% endfor %}
-      </div>
-    </div>
+<!-- Верхняя панель -->
+<div class="topbar">
+  <div class="search-bar">
+    <img src="{% static 'icons/search.svg' %}" alt="Поиск" class="icon">
+    <input type="text" placeholder="Поиск">
+  </div>
 
-    <div class="col" id="col-inwork">
-      <h3>В работе</h3>
-      <div class="list" data-status="inwork">
-        {% for t in tasks_inwork %}
-          <div class="task-card" data-id="{{ t.id }}">{{ t.title }}</div>
-        {% endfor %}
-      </div>
-    </div>
+  <button class="add-project-btn">Добавить задачу</button>
 
-    <div class="col" id="col-done">
-      <h3>Завершено</h3>
-      <div class="list" data-status="done">
-        {% for t in tasks_done %}
-          <div class="task-card" data-id="{{ t.id }}">{{ t.title }}</div>
-        {% endfor %}
-      </div>
+  <div class="profile-bar">
+    <img src="{% static 'icons/avatar.png' %}" alt="Аватар" class="avatar">
+    <span class="username">Максим Е.</span>
+    <div class="profile-actions">
+      <img src="{% static 'icons/edit.svg' %}" alt="Редактировать" class="icon-btn">
+      <img src="{% static 'icons/logout.svg' %}" alt="Выход" class="icon-btn">
     </div>
-  </section>
+  </div>
 </div>
+
+<!-- Хлебные крошки -->
+<div class="breadcrumbs">
+  <span class="crumb-gray">Мои проекты</span>
+  <span class="crumb-gray"> > </span>
+  <span class="crumb-white">{{ project.title }}</span>
+</div>
+
+<!-- Контейнер страницы -->
+<div class="project-detail-wrapper">
+  <!-- Левая часть: информация о проекте -->
+  <div class="project-info-box">
+    <div class="project-info-header">
+      <h2>О проекте</h2>
+      <div class="actions">
+        <img src="{% static 'icons/edit.svg' %}" alt="Редактировать" class="icon-btn">
+        <img src="{% static 'icons/delete.svg' %}" alt="Удалить" class="icon-btn">
+      </div>
+    </div>
+
+    <p class="project-description">{{ project.description|default:"Описание пока не добавлено." }}</p>
+
+    <div class="info-row">
+      <div class="info-left">
+        <img src="{% static 'icons/user.svg' %}" alt="Клиент" class="meta-icon">
+        <span class="meta-text">{{ project.client_name|default:"Без клиента" }}</span>
+      </div>
+      <div class="info-right">
+        <span class="status-badge">{{ project.get_status_display }}</span>
+      </div>
+    </div>
+
+    <div class="info-row">
+      <div class="info-left">
+        <img src="{% static 'icons/ruble.svg' %}" alt="Стоимость" class="meta-icon">
+        <span class="meta-text">{{ project.budget|format_currency|default:"—" }}</span>
+      </div>
+      <div class="info-right">
+        <span class="payment-status {{ project.payment_status|default:'not-paid' }}">
+          {{ project.get_payment_status_display|default:"Не оплачен" }}
+        </span>
+      </div>
+    </div>
+
+    <div class="date-progress">
+      <div class="date-row">
+        <span>{{ project.start_date|date:"d.m.Y"|default:"—" }}</span>
+        <span>{{ project.end_date|date:"d.m.Y"|default:"—" }}</span>
+      </div>
+
+      <div class="progress-bar">
+        <div class="progress-fill" style="width: {{ project.progress|default:'0' }}%;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Правая часть: мини-Kanban -->
+  <div class="kanban-mini">
+    <div class="kanban-column" data-status="planned">
+      <h3>К выполнению</h3>
+      <div class="kanban-cards">
+        {% for task in tasks_todo %}
+        <div class="task-card">{{ task.title }}</div>
+        {% empty %}
+        <p class="empty">Нет задач</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="kanban-column" data-status="inwork">
+      <h3>В работе</h3>
+      <div class="kanban-cards">
+        {% for task in tasks_inwork %}
+        <div class="task-card">{{ task.title }}</div>
+        {% empty %}
+        <p class="empty">Нет задач</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="kanban-column" data-status="done">
+      <h3>Завершено</h3>
+      <div class="kanban-cards">
+        {% for task in tasks_done %}
+        <div class="task-card">{{ task.title }}</div>
+        {% empty %}
+        <p class="empty">Нет задач</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
 {% endblock %}

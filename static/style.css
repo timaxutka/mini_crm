@@ -1,84 +1,84 @@
 /* Сбрасываем стандартные стили */
 * {
-    box-sizing: border-box !important;
-    margin: 0 !important;
-    padding: 0 !important;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 body {
-    font-family: 'Montserrat', Arial, sans-serif !important;
-    background-color: #000000 !important;
-    color: white !important;
-    overflow-x: hidden !important;
+    font-family: 'Montserrat', Arial, sans-serif;
+    background-color: #000000;
+    color: white;
+    overflow-x: hidden;
 }
+
 /* Верхняя панель */
 .topbar {
-    display: flex !important;
-    align-items: center !important;
-    gap: 30px !important;
-    margin: 30px 30px 30px 0 !important;
-    height: 50px !important;
-    width: 1515px !important;
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    margin-bottom: 30px;
+    height: 50px;
+    width: 100%; /* Вместо 1515px */
 }
+
 /* Поисковая строка */
 .search-bar {
-    display: flex !important;
-    align-items: center !important;
-    background-color: #0D0D0D !important;
-    border-radius: 5px !important;
-    padding: 0 20px !important;
-    width: 915px !important;
-    height: 50px !important;
-    flex-shrink: 0 !important;
+    display: flex;
+    align-items: center;
+    background-color: #0D0D0D;
+    border-radius: 5px;
+    padding: 0 20px;
+    flex-grow: 1; /* Растягивается на всё свободное пространство */
+    height: 50px;
 }
+
 .search-bar .icon {
     width: 24px !important;
     height: 24px !important;
     margin-right: 10px !important;
     filter: brightness(0) saturate(100%) invert(50%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(80%) !important;
 }
+
 .search-bar input {
-    background: transparent !important;
-    border: none !important;
-    outline: none !important;
-    color: #808080 !important;
-    font-size: 14px !important;
-    font-weight: 500 !important;
-    font-family: 'Montserrat', sans-serif !important;
-    width: 100% !important;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #808080;
+    font-size: 14px;
+    width: 100%;
 }
+
 .search-bar input::placeholder {
     color: #808080 !important;
 }
-/* Кнопка добавления проекта */
+
+/* Кнопка и профиль (оставляем фиксированными для структуры) */
 .add-project-btn {
-    width: 285px !important;
-    height: 50px !important;
-    background-color: #FFFFFF !important;
-    color: #000000 !important;
-    border: none !important;
-    border-radius: 5px !important;
-    font-weight: 700 !important;
-    font-size: 14px !important;
-    font-family: 'Montserrat', sans-serif !important;
-    cursor: pointer !important;
-    transition: background 0.2s ease !important;
-    flex-shrink: 0 !important;
+    width: 285px;
+    height: 50px;
+    background-color: #FFFFFF;
+    color: #000000;
+    border: none;
+    border-radius: 5px;
+    font-weight: 700;
+    cursor: pointer;
 }
+
 .add-project-btn:hover {
     background-color: #EAEAEA !important;
 }
+
 /* Профиль */
 .profile-bar {
-    width: 285px !important;
-    min-width: 285px !important;
-    height: 50px !important;
-    background-color: #0D0D0D !important;
-    border-radius: 5px !important;
-    display: flex !important;
-    align-items: center !important;
-    padding: 0 15px 0 0 !important;
-    flex-shrink: 0 !important;
+    width: 285px;
+    height: 50px;
+    background-color: #0D0D0D;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    padding: 0 15px;
 }
+
 .profile-bar .avatar {
     width: 50px !important;
     height: 50px !important;
@@ -113,16 +113,18 @@ body {
 }
 /* Сайдбар */
 .sidebar {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 315px !important;
-    height: 100vh !important;
-    background-color: #050505 !important;
-    display: flex !important;
-    flex-direction: column !important;
-    padding: 32px 15px 0 15px !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 315px;
+    height: 100vh;
+    background-color: #050505;
+    display: flex;
+    flex-direction: column;
+    padding: 32px 15px 0 15px;
+    z-index: 100;
 }
+
 /* Логотип */
 .logo {
     font-family: 'Montserrat', sans-serif !important;
@@ -231,13 +233,14 @@ body {
     padding-bottom: 2px !important;
 }
 /* Контент */
+/* Контентная область */
 .content {
-    margin-left: 315px !important;
-    padding: 30px !important;
-    min-height: 100vh !important;
-    background-color: #000000 !important;
-    width: 1575px !important;
-    overflow-x: hidden !important;
+    margin-left: 315px; /* Отступ под сайдбар */
+    padding: 30px;
+    min-height: 100vh;
+    background-color: #000000;
+    /* Убрали фиксированную ширину 1575px */
+    width: calc(100% - 315px); 
 }
 /* Заголовок страницы "Мои проекты" */
 .content h1 {
@@ -249,16 +252,15 @@ body {
 }
 /* Kanban-доска */
 .kanban-board {
-    display: flex !important;
-    gap: 30px !important;
-    flex-wrap: nowrap !important;
-    width: 100% !important;
-    max-width: 1515px !important;
+    display: flex;
+    gap: 30px;
+    width: 100%; /* Растягивается на ширину контента */
 }
+
 /* Колонки */
 .kanban-column {
-    width: 285px !important;
-    flex-shrink: 0 !important;
+    flex: 1; /* Каждая колонка занимает равную часть ширины экрана */
+    min-width: 200px; /* Минимальный порог, чтобы не схлопнулись совсем */
 }
 /* Подзаголовки колонок */
 .kanban-column-header h2 {
@@ -268,16 +270,15 @@ body {
     color: #e2e2e2 !important;
     margin: 0 0 15px 0 !important;
 }
-/* Контейнер карточек */
 .kanban-cards {
-    background-color: #0D0D0D !important;
-    border-radius: 5px !important;
-    padding: 15px !important;
-    min-height: 60px !important;
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 20px !important;
-    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), min-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s ease, box-shadow 0.3s ease !important;
+    background-color: #0D0D0D;
+    border-radius: 5px;
+    padding: 15px;
+    min-height: 100px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    border: 1px solid #191919;
 }
 /* Анимация растяжения для пустых контейнеров */
 .kanban-cards:empty.stretch {
@@ -305,20 +306,23 @@ body {
 .kanban-column.drag-over .kanban-cards {
     background-color: #2a2a2a !important;
 }
-/* Карточки проектов */
+/* Карточки проекта */
 .project-card {
-    background-color: #1A1A1A !important;
-    padding: 20px !important;
-    border-radius: 5px !important;
-    width: 100% !important;
-    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    cursor: move !important;
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 8px !important;
+    background-color: #1A1A1A;
+    padding: 20px;
+    border-radius: 5px;
+    width: 100%;
+    transition: transform 0.2s ease;
 }
 .project-card:hover {
+    background-color: #222222 !important;
     transform: translateY(-4px) !important;
+    box-shadow: 0 4px 10px rgba(255, 255, 255, 0.08) !important;
+}
+.project-card:active {
+    transform: scale(0.97) !important;
+    background-color: #141414 !important;
+    box-shadow: 0 0 0 transparent !important;
 }
 .project-card.dragging {
     /* Никаких дополнительных эффектов, только отсутствие прозрачности */
@@ -394,151 +398,4 @@ body {
 }
 .project-card .status {
     display: none !important;
-}
-/* Адаптивность */
-@media (max-width: 1440px) {
-    .topbar {
-        margin: 20px 20px 20px 0 !important;
-        gap: 15px !important;
-        width: 100% !important;
-        max-width: calc(100% - 250px) !important;
-    }
-    .search-bar {
-        width: 700px !important;
-        min-width: 0 !important;
-        flex-grow: 1 !important;
-    }
-    .add-project-btn {
-        width: 200px !important;
-        min-width: 200px !important;
-    }
-    .profile-bar {
-        width: 200px !important;
-        min-width: 200px !important;
-    }
-    .sidebar {
-        width: 250px !important;
-        padding: 20px 15px 0 15px !important;
-    }
-    .content {
-        margin-left: 250px !important;
-        padding: 20px !important;
-        width: 100% !important;
-        max-width: calc(100% - 250px) !important;
-    }
-    .kanban-board {
-        gap: 15px !important;
-        flex-wrap: wrap !important;
-        width: 100% !important;
-        max-width: calc(100% - 40px) !important;
-    }
-    .kanban-column {
-        width: 260px !important;
-        min-width: 180px !important;
-        max-width: 260px !important;
-    }
-    .nav-item a img, .settings a img {
-        width: 28px !important;
-        height: 28px !important;
-    }
-}
-@media (max-width: 1024px) {
-    .topbar {
-        margin: 15px 15px 15px 0 !important;
-        gap: 10px !important;
-        width: 100% !important;
-        max-width: calc(100% - 200px) !important;
-    }
-    .search-bar {
-        width: 500px !important;
-        min-width: 0 !important;
-        flex-grow: 1 !important;
-    }
-    .add-project-btn {
-        width: 150px !important;
-        min-width: 150px !important;
-    }
-    .profile-bar {
-        width: 150px !important;
-        min-width: 150px !important;
-    }
-    .sidebar {
-        width: 200px !important;
-        padding: 15px 15px 0 15px !important;
-    }
-    .content {
-        margin-left: 200px !important;
-        padding: 15px !important;
-        width: 100% !important;
-        max-width: calc(100% - 200px) !important;
-    }
-    .kanban-board {
-        gap: 10px !important;
-        flex-wrap: wrap !important;
-        width: 100% !important;
-        max-width: calc(100% - 30px) !important;
-    }
-    .kanban-column {
-        width: 240px !important;
-        min-width: 160px !important;
-        max-width: 240px !important;
-    }
-    .nav-item a img, .settings a img {
-        width: 24px !important;
-        height: 24px !important;
-    }
-}
-@media (max-width: 768px) {
-    .topbar {
-        margin: 15px !important;
-        flex-direction: column !important;
-        align-items: flex-start !important;
-        gap: 15px !important;
-        width: 100% !important;
-        max-width: 100% !important;
-    }
-    .search-bar {
-        width: 100% !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
-    }
-    .add-project-btn {
-        width: 100% !important;
-        min-width: 0 !important;
-    }
-    .profile-bar {
-        width: 100% !important;
-        min-width: 0 !important;
-    }
-    .sidebar {
-        width: 100% !important;
-        height: auto !important;
-        position: static !important;
-        padding: 15px 15px 0 15px !important;
-    }
-    .content {
-        margin-left: 0 !important;
-        padding: 15px !important;
-        width: 100% !important;
-        max-width: 100% !important;
-    }
-    .kanban-board {
-        flex-direction: column !important;
-        gap: 15px !important;
-        width: 100% !important;
-        max-width: 100% !important;
-    }
-    .kanban-column {
-        width: 100% !important;
-        min-width: 100% !important;
-        max-width: 100% !important;
-    }
-    .nav-item a img, .settings a img {
-        width: 20px !important;
-        height: 20px !important;
-    }
-    .settings {
-        margin-bottom: 15px !important;
-        padding-bottom: 0 !important;
-    }
 }

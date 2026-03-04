@@ -17,113 +17,134 @@
         </div>
     </div>
 </div>
+
 <h1>Мои проекты</h1>
+
 <div class="kanban-board">
     <!-- Колонка: К выполнению -->
     <div class="kanban-column" data-status="planned">
-        <div class="kanban-column-header">
-            <h2>К выполнению</h2>
-        </div>
+        <div class="kanban-column-header"><h2>К выполнению</h2></div>
         <div class="kanban-cards">
-            {% for project in projects %}
-                {% if project.status == 'planned' %}
-                    <div class="project-card" draggable="true" data-project-id="{{ project.id }}">
-                        <div class="title">{{ project.title }}</div>
-                        <div class="deadline">Дедлайн: {{ project.end_date|default:"—" }}</div>
-                        <div class="client">{{ project.client_name|default:"—" }}</div>
-                        <div class="cost">{{ project.budget|format_currency|default:"—" }}</div>
-                        <div class="payment-status {{ project.payment_status|default:'not-paid' }}">
-                            {{ project.get_payment_status_display|default:"Не оплачен" }}
-                        </div>
+            {% for project in planned %}
+                <div class="project-card"
+                     draggable="true"
+                     data-project-id="{{ project.id }}">
+                    <div class="title">{{ project.title }}</div>
+                    <div class="deadline">Дедлайн: {{ project.end_date|default:"—" }}</div>
+                    <div class="client">{{ project.client_name|default:"—" }}</div>
+                    <div class="cost">{{ project.budget|format_currency|default:"—" }}</div>
+                    <div class="payment-status {{ project.payment_status|default:'not-paid' }}">
+                        {{ project.get_payment_status_display|default:"Не оплачен" }}
                     </div>
-                {% endif %}
+                </div>
             {% endfor %}
         </div>
     </div>
+
     <!-- Колонка: В работе -->
     <div class="kanban-column" data-status="inwork">
-        <div class="kanban-column-header">
-            <h2>В работе</h2>
-        </div>
+        <div class="kanban-column-header"><h2>В работе</h2></div>
         <div class="kanban-cards">
-            {% for project in projects %}
-                {% if project.status == 'inwork' %}
-                    <div class="project-card" draggable="true" data-project-id="{{ project.id }}">
-                        <div class="title">{{ project.title }}</div>
-                        <div class="deadline">Дедлайн: {{ project.end_date|default:"—" }}</div>
-                        <div class="client">{{ project.client_name|default:"—" }}</div>
-                        <div class="cost">{{ project.budget|format_currency|default:"—" }}</div>
-                        <div class="payment-status {{ project.payment_status|default:'not-paid' }}">
-                            {{ project.get_payment_status_display|default:"Не оплачен" }}
-                        </div>
+            {% for project in inwork %}
+                <div class="project-card"
+                     draggable="true"
+                     data-project-id="{{ project.id }}">
+                    <div class="title">{{ project.title }}</div>
+                    <div class="deadline">Дедлайн: {{ project.end_date|default:"—" }}</div>
+                    <div class="client">{{ project.client_name|default:"—" }}</div>
+                    <div class="cost">{{ project.budget|format_currency|default:"—" }}</div>
+                    <div class="payment-status {{ project.payment_status|default:'not-paid' }}">
+                        {{ project.get_payment_status_display|default:"Не оплачен" }}
                     </div>
-                {% endif %}
+                </div>
             {% endfor %}
         </div>
     </div>
+
     <!-- Колонка: Завершён -->
     <div class="kanban-column" data-status="done">
-        <div class="kanban-column-header">
-            <h2>Завершён</h2>
-        </div>
+        <div class="kanban-column-header"><h2>Завершён</h2></div>
         <div class="kanban-cards">
-            {% for project in projects %}
-                {% if project.status == 'done' %}
-                    <div class="project-card" draggable="true" data-project-id="{{ project.id }}">
-                        <div class="title">{{ project.title }}</div>
-                        <div class="deadline">Дедлайн: {{ project.end_date|default:"—" }}</div>
-                        <div class="client">{{ project.client_name|default:"—" }}</div>
-                        <div class="cost">{{ project.budget|format_currency|default:"—" }}</div>
-                        <div class="payment-status {{ project.payment_status|default:'not-paid' }}">
-                            {{ project.get_payment_status_display|default:"Не оплачен" }}
-                        </div>
+            {% for project in done %}
+                <div class="project-card"
+                     draggable="true"
+                     data-project-id="{{ project.id }}">
+                    <div class="title">{{ project.title }}</div>
+                    <div class="deadline">Дедлайн: {{ project.end_date|default:"—" }}</div>
+                    <div class="client">{{ project.client_name|default:"—" }}</div>
+                    <div class="cost">{{ project.budget|format_currency|default:"—" }}</div>
+                    <div class="payment-status {{ project.payment_status|default:'not-paid' }}">
+                        {{ project.get_payment_status_display|default:"Не оплачен" }}
                     </div>
-                {% endif %}
+                </div>
             {% endfor %}
         </div>
     </div>
+
     <!-- Колонка: Просрочен -->
     <div class="kanban-column" data-status="overdue">
-        <div class="kanban-column-header">
-            <h2>Просрочен</h2>
-        </div>
+        <div class="kanban-column-header"><h2>Просрочен</h2></div>
         <div class="kanban-cards">
-            {% for project in projects %}
-                {% if project.status == 'overdue' %}
-                    <div class="project-card" draggable="true" data-project-id="{{ project.id }}">
-                        <div class="title">{{ project.title }}</div>
-                        <div class="deadline">Дедлайн: {{ project.end_date|default:"—" }}</div>
-                        <div class="client">{{ project.client_name|default:"—" }}</div>
-                        <div class="cost">{{ project.budget|format_currency|default:"—" }}</div>
-                        <div class="payment-status {{ project.payment_status|default:'not-paid' }}">
-                            {{ project.get_payment_status_display|default:"Не оплачен" }}
-                        </div>
+            {% for project in overdue %}
+                <div class="project-card"
+                     draggable="true"
+                     data-project-id="{{ project.id }}">
+                    <div class="title">{{ project.title }}</div>
+                    <div class="deadline">Дедлайн: {{ project.end_date|default:"—" }}</div>
+                    <div class="client">{{ project.client_name|default:"—" }}</div>
+                    <div class="cost">{{ project.budget|format_currency|default:"—" }}</div>
+                    <div class="payment-status {{ project.payment_status|default:'not-paid' }}">
+                        {{ project.get_payment_status_display|default:"Не оплачен" }}
                     </div>
-                {% endif %}
+                </div>
             {% endfor %}
         </div>
     </div>
+
     <!-- Колонка: Приостановлен -->
     <div class="kanban-column" data-status="paused">
-        <div class="kanban-column-header">
-            <h2>Приостановлен</h2>
-        </div>
+        <div class="kanban-column-header"><h2>Приостановлен</h2></div>
         <div class="kanban-cards">
-            {% for project in projects %}
-                {% if project.status == 'paused' %}
-                    <div class="project-card" draggable="true" data-project-id="{{ project.id }}">
-                        <div class="title">{{ project.title }}</div>
-                        <div class="deadline">Дедлайн: {{ project.end_date|default:"—" }}</div>
-                        <div class="client">{{ project.client_name|default:"—" }}</div>
-                        <div class="cost">{{ project.budget|format_currency|default:"—" }}</div>
-                        <div class="payment-status {{ project.payment_status|default:'not-paid' }}">
-                            {{ project.get_payment_status_display|default:"Не оплачен" }}
-                        </div>
+            {% for project in paused %}
+                <div class="project-card"
+                     draggable="true"
+                     data-project-id="{{ project.id }}">
+                    <div class="title">{{ project.title }}</div>
+                    <div class="deadline">Дедлайн: {{ project.end_date|default:"—" }}</div>
+                    <div class="client">{{ project.client_name|default:"—" }}</div>
+                    <div class="cost">{{ project.budget|format_currency|default:"—" }}</div>
+                    <div class="payment-status {{ project.payment_status|default:'not-paid' }}">
+                        {{ project.get_payment_status_display|default:"Не оплачен" }}
                     </div>
-                {% endif %}
+                </div>
             {% endfor %}
         </div>
     </div>
 </div>
+
 <script src="{% static 'kanban.js' %}"></script>
+
+<!-- Скрипт для клика по карточке (переход на detail) — проверяет, не происходит ли drag -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    let isDragging = false;
+
+    document.querySelectorAll('.project-card').forEach(card => {
+        card.addEventListener('dragstart', () => { isDragging = true; });
+        card.addEventListener('dragend', () => {
+            // небольшая пауза чтобы событие click не сработало
+            setTimeout(() => { isDragging = false; }, 50);
+        });
+
+        card.addEventListener('click', (e) => {
+            if (isDragging) { e.preventDefault(); return; }
+            const id = card.dataset.projectId;
+            if (id) {
+                window.location.href = "{% url 'project_detail' 0 %}".replace('/0/', `/${id}/`);
+            }
+        });
+    });
+});
+</script>
+
 {% endblock %}
