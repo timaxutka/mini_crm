@@ -73,13 +73,15 @@ def update_status(request):
     return JsonResponse({'success': True})
 
 def project_detail(request, project_id):
-    """Страница конкретного проекта"""
+    """Страница конкретного проекта с его задачами"""
     project = get_object_or_404(Project, id=project_id)
+    
+    # Получаем задачи через related_name='tasks'
+    tasks = project.tasks.all()
 
-    # Если у тебя пока нет модели Task — просто рендерим без задач
     return render(request, 'project_detail.html', {
         'project': project,
-        'tasks_todo': [],
-        'tasks_inwork': [],
-        'tasks_done': [],
+        'tasks_todo': tasks.filter(status='todo'),
+        'tasks_inwork': tasks.filter(status='inwork'),
+        'tasks_done': tasks.filter(status='done'),
     })

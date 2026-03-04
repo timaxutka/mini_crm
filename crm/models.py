@@ -56,3 +56,23 @@ class Project(models.Model):
 
     class Meta:
         ordering = ['status', 'order', 'id']
+
+
+class Task(models.Model):
+    TASK_STATUS_CHOICES = (
+        ('todo', 'К выполнению'),
+        ('inwork', 'В работе'),
+        ('done', 'Выполнено'),
+    )
+
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='tasks', verbose_name="Проект")
+    title = models.CharField(max_length=255, verbose_name="Заголовок задачи")
+    status = models.CharField(max_length=20, choices=TASK_STATUS_CHOICES, default='todo', verbose_name="Статус задачи")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.title} — {self.project.title}"
+
+    class Meta:
+        verbose_name = "Задача"
+        verbose_name_plural = "Задачи"

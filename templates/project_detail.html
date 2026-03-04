@@ -1,116 +1,71 @@
 {% extends 'base.html' %}
-{% load static format_currency %}
+{% load static %}
+
 {% block content %}
-
-<!-- Верхняя панель -->
-<div class="topbar">
-  <div class="search-bar">
-    <img src="{% static 'icons/search.svg' %}" alt="Поиск" class="icon">
-    <input type="text" placeholder="Поиск">
-  </div>
-
-  <button class="add-project-btn">Добавить задачу</button>
-
-  <div class="profile-bar">
-    <img src="{% static 'icons/avatar.png' %}" alt="Аватар" class="avatar">
-    <span class="username">Максим Е.</span>
-    <div class="profile-actions">
-      <img src="{% static 'icons/edit.svg' %}" alt="Редактировать" class="icon-btn">
-      <img src="{% static 'icons/logout.svg' %}" alt="Выход" class="icon-btn">
+<div class="content">
+    <div class="topbar">
+        <h1>Проект: {{ project.title }}</h1>
+        <div style="flex-grow: 1;"></div>
+        <a href="{% url 'projects' %}" class="add-project-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">
+            ← К списку
+        </a>
     </div>
-  </div>
+
+    <div class="project-card" style="cursor: default; display: flex; gap: 40px; padding: 25px; margin-bottom: 40px; border: 1px solid #191919;">
+        <div style="flex: 1;">
+            <p class="deadline">Детали проекта</p>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+                <p class="client">Клиент: <span style="color: white;">{{ project.client_name|default:"—" }}</span></p>
+                <p class="client">Дедлайн: <span style="color: white;">{{ project.end_date|date:"d.m.Y"|default:"не задан" }}</span></p>
+                <p class="client">Бюджет: <span style="color: white; font-weight: bold;">{{ project.budget|default:"0" }} ₽</span></p>
+                <p class="client">Оплата: <span class="payment-status {{ project.payment_status }}">{{ project.get_payment_status_display }}</span></p>
+            </div>
+        </div>
+        <div style="flex: 2; border-left: 1px solid #333; padding-left: 40px;">
+            <p class="deadline">Описание</p>
+            <p style="color: #e2e2e2; font-size: 14px; margin-top: 10px; line-height: 1.6;">
+                {{ project.description|default:"Описание не добавлено" }}
+            </p>
+        </div>
+    </div>
+
+    <h2 style="margin-bottom: 20px; font-weight: 500;">Задачи проекта</h2>
+
+    <div class="kanban-board">
+        <div class="kanban-column">
+            <div class="kanban-column-header"><h2>К выполнению</h2></div>
+            <div class="kanban-cards">
+                {% for task in tasks_todo %}
+                    <div class="project-card" style="padding: 15px; margin-bottom: 10px;">
+                        <p class="title" style="font-size: 14px;">{{ task.title }}</p>
+                    </div>
+                {% empty %}
+                    <p style="color: #444; font-size: 12px; padding: 10px;">Задач нет</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="kanban-column">
+            <div class="kanban-column-header"><h2>В работе</h2></div>
+            <div class="kanban-cards" style="border-color: #BEBE5F !important;">
+                {% for task in tasks_inwork %}
+                    <div class="project-card" style="padding: 15px; margin-bottom: 10px;">
+                        <p class="title" style="font-size: 14px;">{{ task.title }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="kanban-column">
+            <div class="kanban-column-header"><h2>Выполнено</h2></div>
+            <div class="kanban-cards" style="border-color: #5FBE6F !important;">
+                {% for task in tasks_done %}
+                    <div class="project-card" style="padding: 15px; margin-bottom: 10px; opacity: 0.5;">
+                        <p class="title" style="font-size: 14px; text-decoration: line-through;">{{ task.title }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
 </div>
-
-<!-- Хлебные крошки -->
-<div class="breadcrumbs">
-  <span class="crumb-gray">Мои проекты</span>
-  <span class="crumb-gray"> > </span>
-  <span class="crumb-white">{{ project.title }}</span>
-</div>
-
-<!-- Контейнер страницы -->
-<div class="project-detail-wrapper">
-  <!-- Левая часть: информация о проекте -->
-  <div class="project-info-box">
-    <div class="project-info-header">
-      <h2>О проекте</h2>
-      <div class="actions">
-        <img src="{% static 'icons/edit.svg' %}" alt="Редактировать" class="icon-btn">
-        <img src="{% static 'icons/delete.svg' %}" alt="Удалить" class="icon-btn">
-      </div>
-    </div>
-
-    <p class="project-description">{{ project.description|default:"Описание пока не добавлено." }}</p>
-
-    <div class="info-row">
-      <div class="info-left">
-        <img src="{% static 'icons/user.svg' %}" alt="Клиент" class="meta-icon">
-        <span class="meta-text">{{ project.client_name|default:"Без клиента" }}</span>
-      </div>
-      <div class="info-right">
-        <span class="status-badge">{{ project.get_status_display }}</span>
-      </div>
-    </div>
-
-    <div class="info-row">
-      <div class="info-left">
-        <img src="{% static 'icons/ruble.svg' %}" alt="Стоимость" class="meta-icon">
-        <span class="meta-text">{{ project.budget|format_currency|default:"—" }}</span>
-      </div>
-      <div class="info-right">
-        <span class="payment-status {{ project.payment_status|default:'not-paid' }}">
-          {{ project.get_payment_status_display|default:"Не оплачен" }}
-        </span>
-      </div>
-    </div>
-
-    <div class="date-progress">
-      <div class="date-row">
-        <span>{{ project.start_date|date:"d.m.Y"|default:"—" }}</span>
-        <span>{{ project.end_date|date:"d.m.Y"|default:"—" }}</span>
-      </div>
-
-      <div class="progress-bar">
-        <div class="progress-fill" style="width: {{ project.progress|default:'0' }}%;"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Правая часть: мини-Kanban -->
-  <div class="kanban-mini">
-    <div class="kanban-column" data-status="planned">
-      <h3>К выполнению</h3>
-      <div class="kanban-cards">
-        {% for task in tasks_todo %}
-        <div class="task-card">{{ task.title }}</div>
-        {% empty %}
-        <p class="empty">Нет задач</p>
-        {% endfor %}
-      </div>
-    </div>
-
-    <div class="kanban-column" data-status="inwork">
-      <h3>В работе</h3>
-      <div class="kanban-cards">
-        {% for task in tasks_inwork %}
-        <div class="task-card">{{ task.title }}</div>
-        {% empty %}
-        <p class="empty">Нет задач</p>
-        {% endfor %}
-      </div>
-    </div>
-
-    <div class="kanban-column" data-status="done">
-      <h3>Завершено</h3>
-      <div class="kanban-cards">
-        {% for task in tasks_done %}
-        <div class="task-card">{{ task.title }}</div>
-        {% empty %}
-        <p class="empty">Нет задач</p>
-        {% endfor %}
-      </div>
-    </div>
-  </div>
-</div>
-
 {% endblock %}
