@@ -2,112 +2,180 @@ document.addEventListener('DOMContentLoaded', () => {
     const columns = document.querySelectorAll('.kanban-column');
     let draggingCard = null;
     let placeholders = new Map();
+    let dragOffset = { x: 0, y: 0 };
 
     columns.forEach(col => {
         const p = document.createElement('div');
         p.classList.add('kanban-placeholder');
         placeholders.set(col, p);
+        
+        p.addEventListener('transitionend', (e) => {
+            if (e.propertyName === 'height' && p.style.height === '0px' && !p.classList.contains('visible')) {
+                if (p.parentNode) p.parentNode.removeChild(p);
+            }
+        });
     });
 
-    // ... (getCookie, sendUpdate, buildOrderList остаются без изменений) ...
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function buildOrderList(container) {
+        return [...container.querySelectorAll('.project-card')]
+            .filter(c => c.style.display !== 'none')
+            .map((c, idx) => ({ 
+                id: c.dataset.projectId, 
+                order: idx + 1 
+            }));
+    }
+
+    function softClearAll() {
+        placeholders.forEach(p => {
+            p.classList.remove('visible');
+            p.style.height = '0px';
+            p.style.marginBottom = '-16px'; // Схлопываем отступ
+        });
+        columns.forEach(c => c.classList.remove('drop-target-active'));
+    }
 
     document.querySelectorAll('.project-card').forEach(card => {
         card.addEventListener('dragstart', (e) => {
             draggingCard = card;
+            const rect = card.getBoundingClientRect();
+            dragOffset.x = e.clientX - rect.left;
+            dragOffset.y = e.clientY - rect.top;
+
             const cardHeight = card.offsetHeight;
             placeholders.forEach(p => {
                 p.dataset.targetHeight = cardHeight + 'px';
-                p.style.height = '0px'; // Сбрасываем перед началом
             });
-            requestAnimationFrame(() => card.classList.add('dragging'));
+
+            requestAnimationFrame(() => {
+                card.classList.add('dragging');
+                card.style.setProperty('display', 'none', 'important'); 
+            });
         });
 
         card.addEventListener('dragend', () => {
-            placeholders.forEach(p => {
-                p.style.height = '0px';
-                p.classList.remove('visible');
-                setTimeout(() => { if (p.parentNode) p.parentNode.removeChild(p); }, 300);
-            });
-            columns.forEach(c => c.classList.remove('drop-target-active'));
-            if (draggingCard) draggingCard.classList.remove('dragging');
+            softClearAll();
+            if (draggingCard) {
+                draggingCard.classList.remove('dragging');
+                draggingCard.style.removeProperty('display');
+            }
             draggingCard = null;
         });
     });
 
     document.addEventListener('dragover', (e) => {
-        e.preventDefault();
+        e.preventDefault(); 
         if (!draggingCard) return;
 
         const mouseX = e.clientX;
         const mouseY = e.clientY;
-        const cardWidth = draggingCard.offsetWidth;
-        const cardLeft = mouseX - cardWidth / 2;
-        const cardRight = mouseX + cardWidth / 2;
+        
+        const targetHStr = placeholders.values().next().value.dataset.targetHeight;
+        const targetH = parseInt(targetHStr);
+        const cardWidth = 300; 
+        
+        const vCard = {
+            left: mouseX - dragOffset.x,
+            right: mouseX - dragOffset.x + cardWidth,
+            top: mouseY - dragOffset.y,
+            bottom: mouseY - dragOffset.y + targetH
+        };
 
-        let closestCol = null;
-        let minDistance = Infinity;
+        let bestCol = null;
+        let maxArea = -1;
 
         columns.forEach(column => {
-            const rect = column.getBoundingClientRect();
-            const cardsContainer = column.querySelector('.kanban-cards');
+            const colRect = column.getBoundingClientRect();
+            const xOverlap = Math.max(0, Math.min(vCard.right, colRect.right) - Math.max(vCard.left, colRect.left));
+            const yOverlap = Math.max(0, Math.min(vCard.bottom, colRect.bottom) - Math.max(vCard.top, colRect.top));
+            const area = xOverlap * yOverlap;
+
+            if (area > maxArea) {
+                maxArea = area;
+                bestCol = column;
+            }
+        });
+
+        columns.forEach(column => {
             const placeholder = placeholders.get(column);
-            const isTouching = (cardLeft < rect.right + 30 && cardRight > rect.left - 30);
+            const cardsContainer = column.querySelector('.kanban-cards');
+            const colRect = column.getBoundingClientRect();
+            const hasXOverlap = vCard.left < colRect.right && vCard.right > colRect.left;
 
-            if (isTouching) {
+            if (hasXOverlap) {
                 const afterElement = getDragAfterElement(cardsContainer, mouseY);
-                const targetH = placeholder.dataset.targetHeight;
 
-                // Если плейсхолдера нет в DOM или он должен сменить позицию
                 if (placeholder.nextElementSibling !== afterElement || !placeholder.parentNode) {
-                    
-                    // Если его вообще нет в этой колонке, вставляем с 0
-                    if (!placeholder.parentNode) {
-                        placeholder.style.height = '0px';
-                        if (afterElement == null) cardsContainer.appendChild(placeholder);
-                        else cardsContainer.insertBefore(placeholder, afterElement);
-                    } else {
-                        // Если он просто переезжает внутри колонки, переставляем
-                        if (afterElement == null) cardsContainer.appendChild(placeholder);
-                        else cardsContainer.insertBefore(placeholder, afterElement);
-                    }
+                    if (afterElement == null) cardsContainer.appendChild(placeholder);
+                    else cardsContainer.insertBefore(placeholder, afterElement);
 
-                    // Магия плавного раскрытия: ждем отрисовки вставки
                     requestAnimationFrame(() => {
-                        requestAnimationFrame(() => {
-                            placeholder.style.height = targetH;
-                            placeholder.classList.add('visible');
-                        });
+                        placeholder.style.height = targetHStr;
+                        placeholder.style.marginBottom = '0px'; // Показываем отступ
+                        placeholder.classList.add('visible');
                     });
                 }
-
-                const colCenter = rect.left + rect.width / 2;
-                const dist = Math.abs(mouseX - colCenter);
-                if (dist < minDistance) {
-                    minDistance = dist;
-                    closestCol = column;
-                }
             } else {
-                // Плавное схлопывание
                 if (placeholder.classList.contains('visible')) {
-                    placeholder.style.height = '0px';
                     placeholder.classList.remove('visible');
+                    placeholder.style.height = '0px';
+                    placeholder.style.marginBottom = '-16px'; // Схлопываем обратно
                 }
             }
-        });
 
-        columns.forEach(c => c === closestCol ? c.classList.add('drop-target-active') : c.classList.remove('drop-target-active'));
+            if (column === bestCol && maxArea > 0) {
+                column.classList.add('drop-target-active');
+            } else {
+                column.classList.remove('drop-target-active');
+            }
+        });
     });
 
-    columns.forEach(column => {
-        column.addEventListener('drop', (e) => {
-            e.preventDefault();
-            const placeholder = placeholders.get(column);
-            if (column.classList.contains('drop-target-active') && draggingCard && placeholder.parentNode) {
-                placeholder.parentNode.replaceChild(draggingCard, placeholder);
+    document.addEventListener('drop', (e) => {
+        e.preventDefault();
+        if (!draggingCard) return;
+
+        const activeCol = document.querySelector('.kanban-column.drop-target-active');
+        if (!activeCol) {
+            softClearAll();
+            return;
+        }
+
+        const placeholder = placeholders.get(activeCol);
+        if (placeholder && placeholder.parentNode) {
+            const container = activeCol.querySelector('.kanban-cards');
+            
+            draggingCard.style.removeProperty('display');
+            draggingCard.style.transition = 'none';
+            
+            placeholder.parentNode.replaceChild(draggingCard, placeholder);
+            
+            const projectId = draggingCard.dataset.projectId;
+            const status = activeCol.dataset.status;
+            
+            requestAnimationFrame(() => {
+                draggingCard.style.transition = '';
                 draggingCard.classList.remove('dragging');
-                sendUpdate(draggingCard.dataset.projectId, column.dataset.status, buildOrderList(column.querySelector('.kanban-cards')));
-            }
-        });
+            });
+
+            const orderList = buildOrderList(container);
+            softClearAll();
+            sendUpdate(projectId, status, orderList);
+        }
     });
 
     function getDragAfterElement(container, y) {
@@ -118,10 +186,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (offset < 0 && offset > closest.offset) return { offset: offset, element: child };
             return closest;
         }, { offset: Number.NEGATIVE_INFINITY }).element;
-    }
-
-    function buildOrderList(container) {
-        return [...container.querySelectorAll('.project-card')].map((c, idx) => ({ id: c.dataset.projectId, order: idx + 1 }));
     }
 
     function sendUpdate(projectId, newStatus, orderList) {

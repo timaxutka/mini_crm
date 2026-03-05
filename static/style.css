@@ -333,20 +333,31 @@ body {
     background: rgba(255, 255, 255, 0.03);
     border: 1px dashed rgba(255, 255, 255, 0.15);
     border-radius: 14px;
-    margin: 0;
     opacity: 0;
-    height: 0; /* Строго 0 */
+    height: 0;
     overflow: hidden;
-    /* Плавность для всех изменений */
-    transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
-                opacity 0.3s ease, 
-                margin 0.3s ease;
     pointer-events: none;
+    box-sizing: border-box;
+    
+    /* Начальное состояние: плейсхолдер "втянут", чтобы не добавлять лишний gap */
+    margin-bottom: -16px; 
+    
+    /* Плавность для всех свойств */
+    transition: height 0.25s cubic-bezier(0.4, 0, 0.2, 1), 
+                opacity 0.2s ease, 
+                margin-bottom 0.25s ease;
 }
 
 .kanban-placeholder.visible {
     opacity: 1;
-    margin-bottom: 16px;
+    /* Когда виден — обнуляем отрицательный маржин, 
+       и gap контейнера (16px) создаст нужный отступ */
+    margin-bottom: 0; 
+}
+
+.kanban-placeholder:not(.visible) {
+    /* Когда плейсхолдер начинает исчезать, мы обнуляем его влияние на поток */
+    pointer-events: none;
 }
 
 .kanban-column.drop-target-active .kanban-cards {
@@ -359,8 +370,6 @@ body {
     transition: background-color 0.3s ease, border-color 0.3s ease;
     min-height: 150px;
 }
-
-
 
 /* --- 7. ФОРМЫ --- */
 input[type=range] { -webkit-appearance: none; background: transparent; width: 100%; margin: 15px 0; }
