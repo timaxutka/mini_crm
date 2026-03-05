@@ -5,6 +5,7 @@ from django.db import transaction
 import json
 from django.db.models import Sum, Q, Count, Prefetch
 from django.utils import timezone
+from django.db.models import Sum
 
 from .models import Project, Client, Task
 
@@ -46,7 +47,22 @@ def tasks(request):
     })
 
 def finance(request):
-    return render(request, 'finance.html')
+    # 1. Считаем общую выручку (все оплаченные проекты)
+    total_revenue = Project.objects.filter(payment_status='paid').aggregate(Sum('budget'))['budget__sum'] or 0
+    
+    # 2. Считаем дебиторку (проекты в работе, которые еще не оплачены)
+    pending_payments = Project.objects.filter(
+        payment_status='pending'
+    ).exclude(status='done').aggregate(Sum('budget'))['budget__sum'] or 0
+
+    # 3. Получаем список последних транзакций (оплаченных проектов)
+    recent_payments = Project.objects.filter(payment_status='paid').select_related('client').order_by('-id')
+
+    return render(request, 'finance.html', {
+        'total_revenue': total_revenue,
+        'pending_payments': pending_payments,
+        'recent_payments': recent_payments,
+    })
 
 def calculator(request):
     return render(request, 'calculator.html')

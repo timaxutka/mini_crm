@@ -1,5 +1,75 @@
 {% extends 'base.html' %}
-
 {% block content %}
-<h1>Страница: Калькулятор</h1>
+<div class="content">
+    <div class="topbar">
+        <h1>Калькулятор стоимости (УТП)</h1>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+        
+        <div class="project-card" style="padding: 25px; border: 1px solid #191919;">
+            <h3 style="color: #808080; font-size: 14px; text-transform: uppercase; margin-bottom: 20px;">Параметры работы</h3>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; font-size: 13px; margin-bottom: 8px;">Желаемый доход в месяц (чистыми), ₽</label>
+                <input type="range" id="desired_income" min="30000" max="500000" step="5000" value="100000" style="width: 100%; accent-color: #7A5AF8;">
+                <div id="income_val" style="text-align: right; color: #7A5AF8; font-weight: bold;">100 000 ₽</div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; font-size: 13px; margin-bottom: 8px;">Ежемесячные расходы (софт, налоги, связь), ₽</label>
+                <input type="number" id="expenses" value="15000" style="width: 100%; background: #0D0D0D; border: 1px solid #191919; color: white; padding: 10px; border-radius: 4px;">
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; font-size: 13px; margin-bottom: 8px;">Сколько часов в неделю вы РЕАЛЬНО работаете?</label>
+                <input type="range" id="hours_week" min="5" max="60" value="25" style="width: 100%; accent-color: #7A5AF8;">
+                <div id="hours_val" style="text-align: right; color: #7A5AF8; font-weight: bold;">25 часов</div>
+            </div>
+        </div>
+
+        <div class="project-card" style="padding: 30px; border: 1px solid #7A5AF8; background: rgba(122, 90, 248, 0.05); display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+            <div style="color: #808080; font-size: 13px; text-transform: uppercase; margin-bottom: 15px;">Ваша минимальная ставка в час:</div>
+            <div id="hourly_rate" style="font-size: 48px; font-weight: bold; color: #fff; margin-bottom: 10px;">0 ₽</div>
+            <p style="font-size: 12px; color: #555; max-width: 250px;">Ниже этой суммы вы работаете в убыток или жертвуете своим уровнем жизни.</p>
+            
+            <hr style="width: 100%; border: 0; border-top: 1px solid #191919; margin: 25px 0;">
+            
+            <div style="width: 100%;">
+                <label style="display: block; font-size: 12px; margin-bottom: 10px; color: #808080;">Оценка конкретного проекта (часов):</label>
+                <input type="number" id="project_hours" value="10" style="width: 100%; background: #0D0D0D; border: 1px solid #191919; color: white; padding: 10px; border-radius: 4px; text-align: center;">
+                <div style="margin-top: 20px; font-size: 18px; color: #808080;">Рекомендуемая цена проекта:</div>
+                <div id="project_total" style="font-size: 32px; font-weight: bold; color: #5FBE6F;">0 ₽</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function calculate() {
+    const income = parseFloat(document.getElementById('desired_income').value);
+    const expenses = parseFloat(document.getElementById('expenses').value);
+    const hoursWeek = parseFloat(document.getElementById('hours_week').value);
+    const projectHours = parseFloat(document.getElementById('project_hours').value);
+
+    // Обновляем текст ползунков
+    document.getElementById('income_val').innerText = income.toLocaleString() + ' ₽';
+    document.getElementById('hours_val').innerText = hoursWeek + ' часов';
+
+    // Формула: (Доход + Расходы) / (Часы в неделю * 4 недели)
+    const monthlyHours = hoursWeek * 4;
+    const rate = (income + expenses) / monthlyHours;
+    
+    document.getElementById('hourly_rate').innerText = Math.round(rate).toLocaleString() + ' ₽';
+    document.getElementById('project_total').innerText = Math.round(rate * projectHours).toLocaleString() + ' ₽';
+}
+
+// Слушаем изменения
+document.querySelectorAll('input').forEach(input => {
+    input.addEventListener('input', calculate);
+});
+
+// Первый расчет при загрузке
+calculate();
+</script>
 {% endblock %}

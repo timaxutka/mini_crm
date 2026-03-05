@@ -399,3 +399,44 @@ body {
 .project-card .status {
     display: none !important;
 }
+
+/* --- Исправления для страниц Клиенты, Финансы, Задачи и Калькулятор --- */
+
+/* Уточняем позиционирование основного контейнера */
+body {
+    display: flex; /* Гарантирует, что sidebar и content стоят в один ряд */
+}
+
+/* Фикс для topbar, чтобы поиск и кнопки не "разлетались" */
+.topbar {
+    justify-content: space-between;
+    max-width: 100%; /* Ограничиваем, чтобы не вылезал за край */
+}
+
+
+
+/* Убираем возможные центрирования на внутренних страницах */
+.content > div {
+    width: 100%;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+/* Выравнивание заголовков на всех страницах по левому краю */
+.content h1 {
+    text-align: left !important;
+    width: 100% !important;
+}
+
+/* Адаптивная сетка для Калькулятора и Финансов (чтобы блоки были в ряд) */
+.calc-grid, .finance-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 20px;
+    width: 100%;
+}
+
+/* Таблицы на страницах Клиенты и Финансы должны занимать всю ширину */
+table {
+    width: 100% !important;
+}
