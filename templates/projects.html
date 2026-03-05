@@ -1,13 +1,12 @@
 {% extends 'base.html' %}
 {% load static format_currency %}
 {% block content %}
-<!-- Верхняя панель -->
 <div class="topbar">
     <div class="search-bar">
         <img src="{% static 'icons/search.svg' %}" alt="Поиск" class="icon">
         <input type="text" placeholder="Поиск">
     </div>
-    <button class="add-project-btn">Добавить новый проект</button>
+    <button class="add-project-btn open-modal-btn" data-status="planned">Добавить новый проект</button>
     <div class="profile-bar">
         <img src="{% static 'icons/avatar.png' %}" alt="Аватар" class="avatar">
         <span class="username" title="Имя пользователя">Максим Е.</span>
@@ -21,14 +20,16 @@
 <h1>Мои проекты</h1>
 
 <div class="kanban-board">
-    <!-- Колонка: К выполнению -->
+
+    
     <div class="kanban-column" data-status="planned">
-        <div class="kanban-column-header"><h2>К выполнению</h2></div>
+        <div class="kanban-column-header">
+            <h2>К выполнению</h2>
+            <button class="open-modal-btn" data-status="planned">+</button>
+        </div>
         <div class="kanban-cards">
             {% for project in planned %}
-                <div class="project-card"
-                     draggable="true"
-                     data-project-id="{{ project.id }}">
+                <div class="project-card" draggable="true" data-project-id="{{ project.id }}">
                     <div class="title">{{ project.title }}</div>
                     <div class="deadline">Дедлайн: {{ project.end_date|default:"—" }}</div>
                     <div class="client">{{ project.client.name|default:"Нет клиента" }}</div>
@@ -41,14 +42,14 @@
         </div>
     </div>
 
-    <!-- Колонка: В работе -->
     <div class="kanban-column" data-status="inwork">
-        <div class="kanban-column-header"><h2>В работе</h2></div>
+        <div class="kanban-column-header">
+            <h2>В работе</h2>
+            <button class="open-modal-btn" data-status="inwork">+</button>
+        </div>
         <div class="kanban-cards">
             {% for project in inwork %}
-                <div class="project-card"
-                     draggable="true"
-                     data-project-id="{{ project.id }}">
+                <div class="project-card" draggable="true" data-project-id="{{ project.id }}">
                     <div class="title">{{ project.title }}</div>
                     <div class="deadline">Дедлайн: {{ project.end_date|default:"—" }}</div>
                     <div class="client">{{ project.client.name|default:"Нет клиента" }}</div>
@@ -61,14 +62,14 @@
         </div>
     </div>
 
-    <!-- Колонка: Завершён -->
     <div class="kanban-column" data-status="done">
-        <div class="kanban-column-header"><h2>Завершён</h2></div>
+        <div class="kanban-column-header">
+            <h2>Завершён</h2>
+            <button class="open-modal-btn" data-status="done">+</button>
+        </div>
         <div class="kanban-cards">
             {% for project in done %}
-                <div class="project-card"
-                     draggable="true"
-                     data-project-id="{{ project.id }}">
+                <div class="project-card" draggable="true" data-project-id="{{ project.id }}">
                     <div class="title">{{ project.title }}</div>
                     <div class="deadline">Дедлайн: {{ project.end_date|default:"—" }}</div>
                     <div class="client">{{ project.client.name|default:"Нет клиента" }}</div>
@@ -81,14 +82,14 @@
         </div>
     </div>
 
-    <!-- Колонка: Просрочен -->
     <div class="kanban-column" data-status="overdue">
-        <div class="kanban-column-header"><h2>Просрочен</h2></div>
+        <div class="kanban-column-header">
+            <h2>Просрочен</h2>
+            <button class="open-modal-btn" data-status="overdue">+</button>
+        </div>
         <div class="kanban-cards">
             {% for project in overdue %}
-                <div class="project-card"
-                     draggable="true"
-                     data-project-id="{{ project.id }}">
+                <div class="project-card" draggable="true" data-project-id="{{ project.id }}">
                     <div class="title">{{ project.title }}</div>
                     <div class="deadline">Дедлайн: {{ project.end_date|default:"—" }}</div>
                     <div class="client">{{ project.client.name|default:"Нет клиента" }}</div>
@@ -101,14 +102,14 @@
         </div>
     </div>
 
-    <!-- Колонка: Приостановлен -->
     <div class="kanban-column" data-status="paused">
-        <div class="kanban-column-header"><h2>Приостановлен</h2></div>
+        <div class="kanban-column-header">
+            <h2>Приостановлен</h2>
+            <button class="open-modal-btn" data-status="paused">+</button>
+        </div>
         <div class="kanban-cards">
             {% for project in paused %}
-                <div class="project-card"
-                     draggable="true"
-                     data-project-id="{{ project.id }}">
+                <div class="project-card" draggable="true" data-project-id="{{ project.id }}">
                     <div class="title">{{ project.title }}</div>
                     <div class="deadline">Дедлайн: {{ project.end_date|default:"—" }}</div>
                     <div class="client">{{ project.client.name|default:"Нет клиента" }}</div>
@@ -122,20 +123,90 @@
     </div>
 </div>
 
+<div id="projectModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Новый проект</h2>
+            <span class="close-modal">&times;</span>
+        </div>
+        
+        <form id="addProjectForm">
+            {% csrf_token %}
+            <input type="hidden" id="modalStatus" name="status" value="planned">
+
+            <div class="form-group">
+                <label>Название проекта</label>
+                <input type="text" name="title" placeholder="Введите название" required>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Клиент</label>
+                    <input type="text" name="client" placeholder="Имя клиента">
+                </div>
+                <div class="form-group">
+                    <label>Дедлайн</label>
+                    <input type="date" name="deadline">
+                </div>
+            </div>
+
+            <div class="cost-section">
+                <div class="section-header">
+                    <label>Стоимость</label>
+                    <div class="toggle-group">
+                        <button type="button" class="toggle-btn active" data-mode="manual">Вручную</button>
+                        <button type="button" class="toggle-btn" data-mode="calc">Калькулятор</button>
+                    </div>
+                </div>
+
+                <div id="manualCostBlock">
+                    <input type="number" name="cost" id="manualPrice" placeholder="Введите сумму (₽)">
+                </div>
+
+                <div id="calcCostBlock" style="display: none;">
+                    <div class="estimate-rows" id="estimateRows">
+                        </div>
+                    <button type="button" class="add-row-btn" id="addServiceRow">+ Добавить услугу</button>
+                    <div class="calc-total">
+                        Итого: <span id="totalDisplay">0</span> ₽
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="submit" class="submit-project-btn">Создать проект</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="deleteZone" class="delete-zone">
+    <div class="delete-content">
+        <img src="{% static 'icons/trash.svg' %}" alt="Удалить" class="trash-icon">
+        <span>Перетащите сюда, чтобы удалить</span>
+    </div>
+</div>
+
+<div id="confirmDeleteModal" class="modal confirm-modal">
+    <div class="modal-content confirm-content">
+        <div class="confirm-icon">⚠️</div>
+        <h2>Удалить проект?</h2>
+        <p>Это действие нельзя будет отменить. Проект исчезнет из базы данных навсегда.</p>
+        <div class="confirm-actions">
+            <button id="cancelDelete" class="btn-secondary">Отмена</button>
+            <button id="confirmDelete" class="btn-danger">Да, удалить</button>
+        </div>
+    </div>
+</div>
+
 <script src="{% static 'kanban.js' %}"></script>
 
-<!-- Скрипт для клика по карточке (переход на detail) — проверяет, не происходит ли drag -->
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     let isDragging = false;
-
     document.querySelectorAll('.project-card').forEach(card => {
         card.addEventListener('dragstart', () => { isDragging = true; });
-        card.addEventListener('dragend', () => {
-            // небольшая пауза чтобы событие click не сработало
-            setTimeout(() => { isDragging = false; }, 50);
-        });
-
+        card.addEventListener('dragend', () => { setTimeout(() => { isDragging = false; }, 50); });
         card.addEventListener('click', (e) => {
             if (isDragging) { e.preventDefault(); return; }
             const id = card.dataset.projectId;
@@ -146,5 +217,4 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 </script>
-
 {% endblock %}

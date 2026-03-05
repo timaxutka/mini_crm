@@ -6,6 +6,7 @@ import json
 from django.db.models import Sum, Q, Count, Prefetch
 from django.utils import timezone
 from django.db.models import Sum
+from django.views.decorators.http import require_POST
 
 from .models import Project, Client, Task
 
@@ -120,3 +121,50 @@ def project_detail(request, project_id):
         'tasks_done': tasks.filter(status='done'),
     })
 
+def add_project_ajax(request):
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        status = request.POST.get('status', 'planned')
+        budget = request.POST.get('cost') or 0
+        deadline_raw = request.POST.get('deadline') # Получаем строку из формы
+        client_name = request.POST.get('client')
+
+        client = None
+        if client_name:
+            client, _ = Client.objects.get_or_create(name=client_name)
+
+        # Создаем проект
+        project = Project.objects.create(
+            title=title,
+            status=status,
+            budget=budget,
+            end_date=deadline_raw if deadline_raw else None, # Django сам поймет строку
+            client=client
+        )
+
+        # БЕЗОПАСНЫЙ ВЫВОД ДАТЫ
+        # Если end_date — строка (только что из формы), выводим её. 
+        # Если это объект даты (из базы), форматируем.
+        if project.end_date:
+            if isinstance(project.end_date, str):
+                display_date = project.end_date
+            else:
+                display_date = project.end_date.strftime('%Y-%m-%d')
+        else:
+            display_date = "—"
+
+        return JsonResponse({
+            'id': project.id,
+            'title': project.title,
+            'status': project.status,
+            'budget': project.budget,
+            'client': project.client.name if project.client else "Нет клиента",
+            'deadline': display_date
+        })
+    
+@require_POST
+def delete_project(request, pk):
+    # Исправленная строка:
+    project = get_object_or_404(Project, pk=pk) 
+    project.delete()
+    return JsonResponse({'status': 'ok'})

@@ -217,13 +217,57 @@ body {
     border: 1px solid rgba(178, 139, 255, 0.3); 
 }
 
+/* Контейнер заголовка колонки */
+.kanban-column-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px; /* Сохраняем твой отступ */
+}
+
+/* Твой существующий стиль текста, но без margin-bottom */
 .kanban-column-header h2 { 
     font-size: 14px; 
     font-weight: 700; 
     color: #555555; 
     text-transform: uppercase; 
     letter-spacing: 1px; 
-    margin-bottom: 20px; 
+    margin-bottom: 0 !important; /* Обнуляем, так как теперь есть флекс */
+}
+
+/* Маленькая кнопка "+" специально для колонок */
+.kanban-column-header .open-modal-btn {
+    width: 24px;
+    height: 24px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    color: #555555;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.2s ease;
+}
+
+.kanban-column-header .open-modal-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #FFFFFF;
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Главная кнопка в топбаре (CTA) остается без изменений */
+.add-project-btn {
+    height: 52px;
+    padding: 0 30px;
+    background: #FFFFFF;
+    color: #000000;
+    border-radius: 14px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
 }
 
 /* Сами карточки (название класса из твоего шаблона) */
@@ -392,3 +436,219 @@ th { color: #444444; font-size: 11px; text-transform: uppercase; padding: 0 20px
 td { background: rgba(255, 255, 255, 0.02); padding: 20px; }
 td:first-child { border-radius: 15px 0 0 15px; }
 td:last-child { border-radius: 0 15px 15px 0; }
+
+.estimate-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    align-items: center;
+}
+.service-name { flex: 2; }
+.service-price { flex: 1; }
+.remove-row {
+    background: none;
+    border: none;
+    color: #ff4d4d;
+    font-size: 20px;
+    cursor: pointer;
+}
+.calc-total {
+    margin-top: 15px;
+    padding-top: 10px;
+    border-top: 1px dashed rgba(255,255,255,0.1);
+    font-weight: bold;
+    text-align: right;
+}
+
+/* Основной контейнер модалки */
+.modal {
+    display: none; /* Скрыта по умолчанию */
+    position: fixed; /* Фиксируем поверх всего */
+    z-index: 9999; /* Максимальный приоритет */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8); /* Полупрозрачный черный фон */
+    backdrop-filter: blur(8px); /* Красивое размытие заднего плана */
+    align-items: center;
+    justify-content: center;
+}
+
+/* Контентное окно */
+.modal-content {
+    background: #181818; /* Темный фон как у карточек */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 30px;
+    border-radius: 24px;
+    width: 100%;
+    max-width: 450px;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    color: white;
+}
+
+/* Заголовок и крестик */
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.close-modal {
+    font-size: 28px;
+    cursor: pointer;
+    color: #666;
+    transition: 0.2s;
+}
+
+.close-modal:hover { color: #fff; }
+
+/* Стили полей формы */
+.form-group { margin-bottom: 20px; }
+.form-group label { display: block; margin-bottom: 8px; color: #aaa; font-size: 0.9rem; }
+
+.modal-content input {
+    width: 100%;
+    background: #252525;
+    border: 1px solid #333;
+    padding: 12px;
+    border-radius: 10px;
+    color: white;
+    outline: none;
+}
+
+.modal-content input:focus { border-color: #555; }
+
+/* Кнопка создания */
+.submit-project-btn {
+    width: 100%;
+    padding: 14px;
+    background: white;
+    color: black;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.submit-project-btn:hover { background: #e0e0e0; }
+
+/* Сетка для полей в ряд (Клиент и Дедлайн) */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+/* Базовое состояние - спрятана внизу */
+.delete-zone {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%) translateY(100%);
+    width: 450px;
+    height: 100px;
+    background: rgba(255, 68, 68, 0.15);
+    border: 2px dashed #ff4444;
+    border-bottom: none;
+    border-radius: 24px 24px 0 0;
+    backdrop-filter: blur(8px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    color: #ff4444;
+}
+
+/* Выплывает, когда начали тянуть */
+.delete-zone.active {
+    transform: translateX(-50%) translateY(0);
+}
+
+/* Подсвечивается, когда карточка прямо над ней */
+.delete-zone.drag-over {
+    background: rgba(255, 0, 0, 0.3);
+    border-style: solid;
+    height: 120px;
+    width: 500px;
+    color: white;
+}
+
+.delete-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    pointer-events: none; /* Чтобы иконка не мешала событию Drop */
+}
+
+.trash-icon {
+    width: 30px;
+    height: 30px;
+    filter: invert(32%) sepia(85%) saturate(2853%) hue-rotate(341deg) brightness(101%) contrast(105%);
+}
+
+.delete-zone.drag-over .trash-icon {
+    filter: brightness(0) invert(1);
+}
+
+/* Специальные стили для модалки подтверждения */
+.confirm-content {
+    max-width: 400px;
+    text-align: center;
+    padding: 30px;
+    border-radius: 20px;
+    animation: modalScale 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes modalScale {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.confirm-icon {
+    font-size: 50px;
+    margin-bottom: 15px;
+}
+
+.confirm-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 25px;
+}
+
+.btn-secondary {
+    padding: 12px 25px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    background: #f5f5f5;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.2s;
+}
+
+.btn-danger {
+    padding: 12px 25px;
+    border-radius: 10px;
+    border: none;
+    background: #ff4444;
+    color: white;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.btn-danger:hover {
+    background: #cc0000;
+    box-shadow: 0 5px 15px rgba(255, 68, 68, 0.4);
+}
