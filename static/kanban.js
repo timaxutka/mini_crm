@@ -1,120 +1,112 @@
 document.addEventListener('DOMContentLoaded', () => {
     const columns = document.querySelectorAll('.kanban-column');
     let draggingCard = null;
-    
-    // Создаем плейсхолдер один раз
-    const placeholder = document.createElement('div');
-    placeholder.classList.add('kanban-placeholder');
+    let placeholders = new Map();
 
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
+    columns.forEach(col => {
+        const p = document.createElement('div');
+        p.classList.add('kanban-placeholder');
+        placeholders.set(col, p);
+    });
 
-    function buildOrderList(cardsContainer) {
-        return [...cardsContainer.querySelectorAll('.project-card')]
-            .map((c, idx) => ({ id: c.dataset.projectId, order: idx + 1 }));
-    }
-
-    function sendUpdate(projectId, newStatus, orderList) {
-        fetch('/update_status/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCookie('csrftoken')
-            },
-            body: JSON.stringify({
-                project_id: projectId,
-                status: newStatus,
-                order_list: orderList
-            })
-        }).catch(err => console.error('Error saving:', err));
-    }
+    // ... (getCookie, sendUpdate, buildOrderList остаются без изменений) ...
 
     document.querySelectorAll('.project-card').forEach(card => {
         card.addEventListener('dragstart', (e) => {
             draggingCard = card;
-            e.dataTransfer.effectAllowed = 'move';
-            
-            // Запоминаем высоту карточки для плейсхолдера
             const cardHeight = card.offsetHeight;
-            placeholder.dataset.targetHeight = cardHeight;
-            
-            requestAnimationFrame(() => {
-                card.classList.add('dragging');
+            placeholders.forEach(p => {
+                p.dataset.targetHeight = cardHeight + 'px';
+                p.style.height = '0px'; // Сбрасываем перед началом
             });
+            requestAnimationFrame(() => card.classList.add('dragging'));
         });
 
         card.addEventListener('dragend', () => {
+            placeholders.forEach(p => {
+                p.style.height = '0px';
+                p.classList.remove('visible');
+                setTimeout(() => { if (p.parentNode) p.parentNode.removeChild(p); }, 300);
+            });
+            columns.forEach(c => c.classList.remove('drop-target-active'));
             if (draggingCard) draggingCard.classList.remove('dragging');
-            placeholder.classList.remove('visible');
-            placeholder.style.height = '0px';
-            if (placeholder.parentNode) placeholder.parentNode.removeChild(placeholder);
-            
-            document.querySelectorAll('.kanban-cards').forEach(c => c.classList.remove('drag-over'));
             draggingCard = null;
         });
     });
 
-    columns.forEach(column => {
-        const cardsContainer = column.querySelector('.kanban-cards');
+    document.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        if (!draggingCard) return;
 
-        column.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            cardsContainer.classList.add('drag-over');
+        const mouseX = e.clientX;
+        const mouseY = e.clientY;
+        const cardWidth = draggingCard.offsetWidth;
+        const cardLeft = mouseX - cardWidth / 2;
+        const cardRight = mouseX + cardWidth / 2;
 
-            const afterElement = getDragAfterElement(cardsContainer, e.clientY);
-            const targetHeight = placeholder.dataset.targetHeight + 'px';
+        let closestCol = null;
+        let minDistance = Infinity;
 
-            // Если плейсхолдера еще нет в этой колонке или он на другом месте
-            if (afterElement == null) {
-                if (cardsContainer.lastElementChild !== placeholder) {
-                    cardsContainer.appendChild(placeholder);
-                    // Trigger reflow для запуска анимации
-                    void placeholder.offsetWidth; 
-                    placeholder.style.height = targetHeight;
-                    placeholder.classList.add('visible');
+        columns.forEach(column => {
+            const rect = column.getBoundingClientRect();
+            const cardsContainer = column.querySelector('.kanban-cards');
+            const placeholder = placeholders.get(column);
+            const isTouching = (cardLeft < rect.right + 30 && cardRight > rect.left - 30);
+
+            if (isTouching) {
+                const afterElement = getDragAfterElement(cardsContainer, mouseY);
+                const targetH = placeholder.dataset.targetHeight;
+
+                // Если плейсхолдера нет в DOM или он должен сменить позицию
+                if (placeholder.nextElementSibling !== afterElement || !placeholder.parentNode) {
+                    
+                    // Если его вообще нет в этой колонке, вставляем с 0
+                    if (!placeholder.parentNode) {
+                        placeholder.style.height = '0px';
+                        if (afterElement == null) cardsContainer.appendChild(placeholder);
+                        else cardsContainer.insertBefore(placeholder, afterElement);
+                    } else {
+                        // Если он просто переезжает внутри колонки, переставляем
+                        if (afterElement == null) cardsContainer.appendChild(placeholder);
+                        else cardsContainer.insertBefore(placeholder, afterElement);
+                    }
+
+                    // Магия плавного раскрытия: ждем отрисовки вставки
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(() => {
+                            placeholder.style.height = targetH;
+                            placeholder.classList.add('visible');
+                        });
+                    });
+                }
+
+                const colCenter = rect.left + rect.width / 2;
+                const dist = Math.abs(mouseX - colCenter);
+                if (dist < minDistance) {
+                    minDistance = dist;
+                    closestCol = column;
                 }
             } else {
-                if (afterElement.previousElementSibling !== placeholder && afterElement !== placeholder) {
-                    cardsContainer.insertBefore(placeholder, afterElement);
-                    void placeholder.offsetWidth;
-                    placeholder.style.height = targetHeight;
-                    placeholder.classList.add('visible');
+                // Плавное схлопывание
+                if (placeholder.classList.contains('visible')) {
+                    placeholder.style.height = '0px';
+                    placeholder.classList.remove('visible');
                 }
             }
         });
 
-        column.addEventListener('dragleave', (e) => {
-            if (!cardsContainer.contains(e.relatedTarget)) {
-                cardsContainer.classList.remove('drag-over');
-                placeholder.classList.remove('visible');
-                placeholder.style.height = '0px';
-            }
-        });
+        columns.forEach(c => c === closestCol ? c.classList.add('drop-target-active') : c.classList.remove('drop-target-active'));
+    });
 
+    columns.forEach(column => {
         column.addEventListener('drop', (e) => {
             e.preventDefault();
-            cardsContainer.classList.remove('drag-over');
-
-            if (!draggingCard) return;
-
-            // Мгновенно заменяем плейсхолдер карточкой
-            placeholder.parentNode.replaceChild(draggingCard, placeholder);
-            draggingCard.classList.remove('dragging');
-
-            const orderList = buildOrderList(cardsContainer);
-            sendUpdate(draggingCard.dataset.projectId, column.dataset.status, orderList);
+            const placeholder = placeholders.get(column);
+            if (column.classList.contains('drop-target-active') && draggingCard && placeholder.parentNode) {
+                placeholder.parentNode.replaceChild(draggingCard, placeholder);
+                draggingCard.classList.remove('dragging');
+                sendUpdate(draggingCard.dataset.projectId, column.dataset.status, buildOrderList(column.querySelector('.kanban-cards')));
+            }
         });
     });
 
@@ -123,11 +115,20 @@ document.addEventListener('DOMContentLoaded', () => {
         return draggableElements.reduce((closest, child) => {
             const box = child.getBoundingClientRect();
             const offset = y - box.top - box.height / 2;
-            if (offset < 0 && offset > closest.offset) {
-                return { offset: offset, element: child };
-            } else {
-                return closest;
-            }
+            if (offset < 0 && offset > closest.offset) return { offset: offset, element: child };
+            return closest;
         }, { offset: Number.NEGATIVE_INFINITY }).element;
+    }
+
+    function buildOrderList(container) {
+        return [...container.querySelectorAll('.project-card')].map((c, idx) => ({ id: c.dataset.projectId, order: idx + 1 }));
+    }
+
+    function sendUpdate(projectId, newStatus, orderList) {
+        fetch('/update_status/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+            body: JSON.stringify({ project_id: projectId, status: newStatus, order_list: orderList })
+        }).catch(err => console.error(err));
     }
 });
