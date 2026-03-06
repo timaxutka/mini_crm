@@ -228,3 +228,15 @@ def update_project_field(request, project_id):
         return JsonResponse({'status': 'error', 'message': 'Invalid field'}, status=400)
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+    
+@require_POST
+def update_task_status(request):
+    data = json.loads(request.body)
+    task_id = data.get('task_id')
+    new_status = data.get('status') # 'todo', 'inwork', 'done'
+
+    task = get_object_or_404(Task, id=task_id)
+    task.status = new_status
+    task.save()
+    
+    return JsonResponse({'success': True})
