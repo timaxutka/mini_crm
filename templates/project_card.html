@@ -1,0 +1,13 @@
+<div class="project-card" 
+     draggable="true" 
+     data-id="{{ project.id }}" 
+     data-model="Project" 
+     data-url="{% url 'project_detail' project.id %}">
+    <div class="title">{{ project.title }}</div>
+    <div class="deadline">Дедлайн: {{ project.end_date|default:"—" }}</div>
+    <div class="client">{{ project.client.name|default:"Нет клиента" }}</div>
+    <div class="cost">{{ project.budget|format_currency|default:"—" }}</div>
+    <div class="payment-status {{ project.payment_status|default:'not-paid' }}">
+        {{ project.get_payment_status_display|default:"Не оплачен" }}
+    </div>
+</div>

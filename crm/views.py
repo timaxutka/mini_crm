@@ -125,42 +125,38 @@ def add_project_ajax(request):
     if request.method == 'POST':
         title = request.POST.get('title')
         status = request.POST.get('status', 'planned')
-        budget = request.POST.get('cost') or 0
-        deadline_raw = request.POST.get('deadline') # Получаем строку из формы
+        # Приводим к числу, если есть данные
+        budget = request.POST.get('cost')
+        budget = int(budget) if budget and budget.isdigit() else 0
+        
+        deadline_raw = request.POST.get('deadline')
         client_name = request.POST.get('client')
 
         client = None
         if client_name:
             client, _ = Client.objects.get_or_create(name=client_name)
 
-        # Создаем проект
+        # Создаем проект ОДИН РАЗ
         project = Project.objects.create(
             title=title,
             status=status,
             budget=budget,
-            end_date=deadline_raw if deadline_raw else None, # Django сам поймет строку
+            end_date=deadline_raw if deadline_raw else None,
             client=client
         )
 
-        # БЕЗОПАСНЫЙ ВЫВОД ДАТЫ
-        # Если end_date — строка (только что из формы), выводим её. 
-        # Если это объект даты (из базы), форматируем.
-        if project.end_date:
-            if isinstance(project.end_date, str):
-                display_date = project.end_date
-            else:
-                display_date = project.end_date.strftime('%Y-%m-%d')
-        else:
-            display_date = "—"
-
+        # Возвращаем JSON
         return JsonResponse({
+            'success': True,
             'id': project.id,
             'title': project.title,
             'status': project.status,
-            'budget': project.budget,
+            'cost': project.budget,
             'client': project.client.name if project.client else "Нет клиента",
-            'deadline': display_date
+            'deadline': str(project.end_date) if project.end_date else "—"
         })
+    
+    return JsonResponse({'success': False, 'error': 'Method not allowed'})
     
 @require_POST
 def delete_project(request, pk):
