@@ -50,7 +50,7 @@
 
     <h2 style="font-size: 14px; font-weight: 700; color: #555; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px;">Задачи проекта</h2>
     
-    <div class="kanban-board">
+    <div class="kanban-board" data-model="Task" data-update-url="{% url 'update_task_status' %}">
         <div class="kanban-column" data-status="todo">
             <div class="kanban-column-header">
                 <h2>К выполнению</h2>
@@ -58,7 +58,7 @@
             </div>
             <div class="kanban-cards">
                 {% for task in tasks_todo %}
-                    <div class="project-card" data-task-id="{{ task.id }}" draggable="true" style="padding: 16px; cursor: grab;">
+                    <div class="project-card" data-id="{{ task.id }}" data-model="Task" draggable="true" style="padding: 16px; cursor: grab;">
                         <p class="title" style="font-size: 14px; margin-bottom: 5px;">{{ task.title }}</p>
                     </div>
                 {% endfor %}
@@ -72,7 +72,7 @@
             </div>
             <div class="kanban-cards">
                 {% for task in tasks_inwork %}
-                    <div class="project-card" data-task-id="{{ task.id }}" draggable="true" style="padding: 16px; cursor: grab;">
+                    <div class="project-card" data-id="{{ task.id }}" data-model="Task" draggable="true" style="padding: 16px; cursor: grab;">
                         <p class="title" style="font-size: 14px; margin-bottom: 5px;">{{ task.title }}</p>
                     </div>
                 {% endfor %}
@@ -86,14 +86,13 @@
             </div>
             <div class="kanban-cards">
                 {% for task in tasks_done %}
-                    <div class="project-card" data-task-id="{{ task.id }}" draggable="true" style="padding: 16px; cursor: grab; opacity: 0.5;">
+                    <div class="project-card" data-id="{{ task.id }}" data-model="Task" draggable="true" style="padding: 16px; cursor: grab; opacity: 0.5;">
                         <p class="title" style="font-size: 14px; margin-bottom: 5px; text-decoration: line-through;">{{ task.title }}</p>
                     </div>
                 {% endfor %}
             </div>
         </div>
     </div>
-</div>
 
 <div id="taskModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); justify-content: center; align-items: center; z-index: 1000;">
     <div class="modal-content" style="background: #1a1a1a; padding: 24px; border-radius: 12px; width: 400px; color: white; border: 1px solid #333;">
@@ -119,16 +118,30 @@
 <script src="{% static 'kanban.js' %}"></script>
 
 <script>
+    // Ждем, пока загрузится КАНБАН
+    window.addEventListener('load', () => {
+        if (typeof window.initAllCards === 'function') {
+            console.log("Канбан найден, запускаю привязку задач...");
+            window.initAllCards();
+        } else {
+            console.warn("Канбан еще не загрузился, ждем...");
+        }
+    });
+</script>
+
+<script>
     const projectId = "{{ project.id }}";
 
     // 2. ОБРАБОТЧИК ФОРМЫ (Этого блока у вас не хватало)
     document.getElementById('addTaskForm').addEventListener('submit', function(e) {
         e.preventDefault(); 
         
+        const status = document.getElementById('taskStatus').value;
+        const title = this.querySelector('input[name="title"]').value;
         const formData = {
-            title: this.querySelector('input[name="title"]').value,
+            title: title,
             description: this.querySelector('textarea[name="description"]').value,
-            status: document.getElementById('taskStatus').value
+            status: status
         };
         
         fetch(`/projects/${projectId}/add_task/`, {
@@ -140,7 +153,37 @@
             body: JSON.stringify(formData)
         })
         .then(res => res.json())
-        
+        .then(data => {
+            if (data.id) {
+                // Создаем карточку задачи
+                const newTask = document.createElement('div');
+                newTask.className = 'project-card';
+                newTask.dataset.id = data.id;
+                newTask.dataset.model = 'Task';
+                newTask.draggable = true;
+                newTask.style.padding = '16px';
+                newTask.style.cursor = 'grab';
+                
+                // Если статус "done", добавляем стили зачеркивания
+                const titleStyle = status === 'done' ? 'text-decoration: line-through; opacity: 0.5;' : '';
+                if (status === 'done') newTask.style.opacity = '0.5';
+
+                newTask.innerHTML = `<p class="title" style="font-size: 14px; margin-bottom: 5px; ${titleStyle}">${title}</p>`;
+                
+                // Инициализируем события перетаскивания (функция из kanban.js)
+                if (typeof initCardEvents === 'function') {
+                    initCardEvents(newTask);
+                }
+
+                // Добавляем в колонку
+                const column = document.querySelector(`.kanban-column[data-status="${status}"] .kanban-cards`);
+                column.appendChild(newTask);
+
+                // Закрываем и сбрасываем
+                closeTaskModal();
+                this.reset();
+            }
+        })
         .catch(err => {
             console.error('Ошибка:', err);
             alert('Не удалось создать задачу.');

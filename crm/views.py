@@ -176,15 +176,14 @@ def update_notes(request, project_id):
 
 @require_POST
 def add_task(request, project_id):
-    import json
     data = json.loads(request.body)
-    # Создание задачи, привязанной к проекту
     task = Task.objects.create(
         project_id=project_id,
         title=data.get('title'),
-        status=data.get('status')
+        status=data.get('status'),
+        description=data.get('description')
     )
-    return JsonResponse({'id': task.id})
+    return JsonResponse({'id': task.id, 'status': task.status}) # Возвращаем ID
 
 @require_POST
 def update_payment(request, project_id):
