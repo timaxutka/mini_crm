@@ -17,6 +17,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnCancelDelete = document.getElementById('cancelDelete');
     let itemToDelete = { id: null, model: null };
 
+    // --- ЗАКРЫТИЕ МОДАЛКИ (КРЕСТИК) ---
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            modal.style.display = 'none';
+            document.body.style.overflow = ''; // Возвращаем скролл страницы
+        });
+    }
+
+    // БОНУС: Закрытие при клике на фон (за пределами окна)
+    window.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+    });
+
     // --- 3. ЛОГИКА СОЗДАНИЯ (МОДАЛКА) ---
     addProjectButtons.forEach(btn => {
         btn.addEventListener('click', () => {
