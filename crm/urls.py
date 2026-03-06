@@ -13,4 +13,6 @@ urlpatterns = [
     path('projects/<int:project_id>/', views.project_detail, name='project_detail'),
     path('add_project/', views.add_project_ajax, name='add_project'),
     path('delete_project/<int:pk>/', views.delete_project, name='delete_project'),
+    path('projects/<int:project_id>/update_payment/', views.update_payment, name='update_payment'),
+    path('projects/<int:project_id>/update_field/', views.update_project_field, name='update_project_field'),
 ]

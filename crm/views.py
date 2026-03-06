@@ -168,3 +168,63 @@ def delete_project(request, pk):
     project = get_object_or_404(Project, pk=pk) 
     project.delete()
     return JsonResponse({'status': 'ok'})
+
+@require_POST
+def update_notes(request, project_id):
+    import json
+    data = json.loads(request.body)
+    project = Project.objects.get(id=project_id)
+    project.description = data.get('description')
+    project.save()
+    return JsonResponse({'status': 'ok'})
+
+@require_POST
+def add_task(request, project_id):
+    import json
+    data = json.loads(request.body)
+    # Создание задачи, привязанной к проекту
+    task = Task.objects.create(
+        project_id=project_id,
+        title=data.get('title'),
+        status=data.get('status')
+    )
+    return JsonResponse({'id': task.id})
+
+@require_POST
+def update_payment(request, project_id):
+    try:
+        data = json.loads(request.body)
+        new_status = data.get('payment_status')
+        
+        project = Project.objects.get(id=project_id)
+        project.payment_status = new_status
+        project.save()
+        
+        return JsonResponse({'status': 'success'})
+    except Project.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Project not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+    
+@require_POST
+def update_project_field(request, project_id):
+    try:
+        data = json.loads(request.body)
+        field = data.get('field')
+        value = data.get('value')
+        
+        project = get_object_or_404(Project, id=project_id)
+        
+        # Безопасная проверка: разрешаем менять только определенные поля
+        allowed_fields = ['title', 'description', 'budget', 'end_date']
+        if field in allowed_fields:
+            if field == 'budget':
+                value = float(value.replace(' ', '')) if value else 0
+            
+            setattr(project, field, value)
+            project.save()
+            return JsonResponse({'status': 'success'})
+            
+        return JsonResponse({'status': 'error', 'message': 'Invalid field'}, status=400)
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)

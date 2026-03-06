@@ -30,7 +30,7 @@ class Project(models.Model):
 
     PAYMENT_CHOICES = (
         ('paid', 'Оплачен'),
-        ('not-paid', 'Не оплачен'),
+        ('not_paid', 'Не оплачен'),
         ('pending', 'Ожидает оплаты'),
     )
 

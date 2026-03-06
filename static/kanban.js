@@ -347,3 +347,79 @@ document.addEventListener('DOMContentLoaded', () => {
         if(manualPriceInput) manualPriceInput.value = total;
     }
 });
+
+const projectId = "{{ project.id }}";
+
+// --- РЕДАКТИРОВАНИЕ ЗАМЕТОК ---
+function editNotes() {
+    const display = document.getElementById('notesDisplay');
+    const editor = document.getElementById('notesEditor');
+    editor.value = display.innerText === "Нажмите, чтобы добавить заметки..." ? "" : display.innerText;
+    display.style.display = 'none';
+    editor.style.display = 'block';
+    editor.focus();
+}
+
+function saveNotes() {
+    const display = document.getElementById('notesDisplay');
+    const editor = document.getElementById('notesEditor');
+    const newText = editor.value;
+
+    fetch(`/projects/${projectId}/update_notes/`, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/json' },
+        body: JSON.stringify({ description: newText })
+    }).then(() => {
+        display.innerText = newText || "Нажмите, чтобы добавить заметки...";
+        editor.style.display = 'none';
+        display.style.display = 'block';
+    });
+}
+
+// --- БЫСТРОЕ ДОБАВЛЕНИЕ ЗАДАЧИ ---
+function addTask(status) {
+    const container = document.querySelector(`.kanban-column[data-status="${status}"] .kanban-cards`);
+    const inputDiv = document.createElement('div');
+    inputDiv.className = 'inline-task-input';
+    inputDiv.innerHTML = `<input type="text" placeholder="Название задачи..." onblur="submitTask(this, '${status}')" onkeyup="if(event.key==='Enter') this.blur()">`;
+    
+    container.prepend(inputDiv);
+    inputDiv.querySelector('input').focus();
+}
+
+function submitTask(input, status) {
+    const title = input.value;
+    if (!title) { input.parentElement.remove(); return; }
+
+    fetch(`/projects/${projectId}/add_task/`, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: title, status: status })
+    }).then(res => res.json()).then(data => {
+        location.reload(); // Для простоты пока обновим, чтобы применились стили Django
+    });
+}
+
+function updatePaymentStatus(newStatus) {
+    const select = document.getElementById('paymentStatusSelect');
+    const projectId = "{{ project.id }}";
+
+    fetch(`/projects/${projectId}/update_payment/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({ 'payment_status': newStatus })
+    })
+    .then(response => {
+        if (response.ok) {
+            // Только если сервер ответил 200 OK, меняем цвет
+            select.classList.remove('paid', 'pending', 'not_paid');
+            select.classList.add(newStatus);
+        } else {
+            alert('Ошибка при сохранении на сервере');
+        }
+    })
+    .catch(error => alert('Ошибка сети'));
+}

@@ -324,7 +324,7 @@ body {
 }
 
 /* Не оплачен — Красный */
-.payment-status.not-paid {
+.payment-status.not_paid {
     background: rgba(255, 75, 75, 0.1);
     color: #FF4B4B;
     border: 1px solid rgba(255, 75, 75, 0.2);
@@ -798,4 +798,101 @@ input:focus {
 .btn-danger:hover {
     background: #cc0000;
     box-shadow: 0 5px 15px rgba(255, 68, 68, 0.4);
+}
+
+/* Базовые стили селектора */
+select.payment-status-dropdown {
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
+    background-color: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 8px;
+    padding: 5px 30px 5px 12px !important;
+    font-size: 14px;
+    font-family: 'Montserrat', sans-serif;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.2s ease;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'%3E%3C/path%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 10px center !important;
+    width: auto !important; /* Чтобы не растягивался как в модалке */
+    display: inline-block;
+}
+
+/* Цвета для конкретных классов */
+select.payment-status-dropdown.paid {
+    color: #5FBE6F !important;
+    border-color: rgba(95, 190, 111, 0.4) !important;
+}
+
+select.payment-status-dropdown.pending, 
+select.payment-status-dropdown.partially { /* Добавил partially на всякий случай */
+    color: #FFD700 !important;
+    border-color: rgba(255, 215, 0, 0.4) !important;
+}
+
+select.payment-status-dropdown.not_paid {
+    color: #ff4444 !important;
+    border-color: rgba(255, 68, 68, 0.4) !important;
+}
+
+/* Стиль списка внутри */
+.payment-status-dropdown option {
+    background: #0a0a0a;
+    color: white;
+}
+
+/* 1. Оплачен — Зеленый */
+.payment-status-dropdown.paid {
+    color: #5FBE6F !important;
+    border-color: rgba(95, 190, 111, 0.4) !important;
+}
+
+/* 2. Ожидает оплаты — Желтый/Золотой */
+.payment-status-dropdown.pending {
+    color: #FFD700 !important;
+    border-color: rgba(255, 215, 0, 0.4) !important;
+}
+
+/* 3. Не оплачен — Красный */
+.payment-status-dropdown.not_paid {
+    color: #ff4444 !important;
+    border-color: rgba(255, 68, 68, 0.4) !important;
+}
+
+/* Стиль выпадающего списка внутри */
+.payment-status-dropdown option {
+    background: #1a1a1a;
+    color: white;
+}
+
+.add-task-btn {
+    background: transparent;
+    border: none;
+    color: #444;
+    font-size: 20px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.add-task-btn:hover { color: white; }
+
+/* Стиль для инлайн-поля ввода задачи */
+.inline-task-input {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    padding: 10px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+}
+
+.inline-task-input input {
+    background: transparent;
+    border: none;
+    color: white;
+    width: 100%;
+    outline: none;
+    font-size: 14px;
 }

@@ -11,29 +11,63 @@
         </a>
     </div>
 
-    <div class="project-card" style="cursor: default; display: flex; gap: 40px; padding: 25px; margin-bottom: 40px; border: 1px solid #191919;">
-        <div style="flex: 1;">
-            <p class="deadline">Детали проекта</p>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
-                <p class="client">Клиент: <span style="color: white;">{{ project.client_name|default:"—" }}</span></p>
-                <p class="client">Дедлайн: <span style="color: white;">{{ project.end_date|date:"d.m.Y"|default:"не задан" }}</span></p>
-                <p class="client">Бюджет: <span style="color: white; font-weight: bold;">{{ project.budget|default:"0" }} ₽</span></p>
-                <p class="client">Оплата: <span class="payment-status {{ project.payment_status }}">{{ project.get_payment_status_display }}</span></p>
+    <div class="project-details-grid" style="display: grid; grid-template-columns: 1fr 2fr; gap: 24px; margin-bottom: 40px;">
+    
+    <div style="display: flex; flex-direction: column; gap: 16px;">
+        
+        <div class="project-card" style="padding: 20px; border: 1px solid #191919;">
+                    <p class="deadline" style="margin-bottom: 12px;">Финансы</p>
+                    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px;">
+                        <span contenteditable="true" onblur="saveField('budget', this.innerText)" 
+                            style="font-size: 24px; font-weight: 800; color: #fff; outline: none; border-bottom: 1px dashed #333;">
+                            {{ project.budget|default:"0" }}
+                        </span>
+                        <span style="color: #555; font-weight: 600;">RUB</span>
+                    </div>
+                    <select id="paymentStatusSelect" class="payment-status-dropdown {{ project.payment_status }}" 
+                            onchange="updatePaymentStatus(this.value)" style="width: 100%; height: 38px;">
+                        <option value="paid" {% if project.payment_status == 'paid' %}selected{% endif %}>Оплачен</option>
+                        <option value="pending" {% if project.payment_status == 'pending' %}selected{% endif %}>Ожидает оплаты</option>
+                        <option value="not_paid" {% if project.payment_status == 'not_paid' %}selected{% endif %}>Не оплачен</option>
+                    </select>
+                </div>
+
+                <div class="project-card" style="padding: 20px; border: 1px solid #191919;">
+                    <div style="margin-bottom: 15px;">
+                        <p class="deadline">Клиент</p>
+                        <p style="color: #fff; font-weight: 600; font-size: 16px; margin-top: 4px;">
+                            {{ project.client.name|default:"—" }}
+                        </p>
+                    </div>
+                    <div>
+                        <p class="deadline">Срок завершения</p>
+                        <input type="date" value="{{ project.end_date|date:'Y-m-d' }}" 
+                            onchange="saveField('end_date', this.value)"
+                            style="background: transparent; border: none; color: #fff; font-size: 16px; font-weight: 600; cursor: pointer; font-family: inherit; width: 100%; outline: none; margin-top: 4px;">
+                    </div>
+                </div>
+            </div>
+
+            <div class="project-card" style="padding: 24px; border: 1px solid #191919; display: flex; flex-direction: column;">
+                <p class="deadline" style="margin-bottom: 12px;">Заметки по проекту</p>
+                <div contenteditable="true" 
+                    onblur="saveField('description', this.innerText)"
+                    class="notes-editor"
+                    style="color: #e2e2e2; font-size: 15px; line-height: 1.6; outline: none; flex-grow: 1; min-height: 150px;"
+                    placeholder="Введите описание проекта...">
+                    {{ project.description|default:"" }}
+                </div>
             </div>
         </div>
-        <div style="flex: 2; border-left: 1px solid #333; padding-left: 40px;">
-            <p class="deadline">Описание</p>
-            <p style="color: #e2e2e2; font-size: 14px; margin-top: 10px; line-height: 1.6;">
-                {{ project.description|default:"Описание не добавлено" }}
-            </p>
-        </div>
-    </div>
 
     <h2 style="margin-bottom: 20px; font-weight: 500;">Задачи проекта</h2>
 
     <div class="kanban-board">
         <div class="kanban-column">
-            <div class="kanban-column-header"><h2>К выполнению</h2></div>
+            <div class="kanban-column-header">
+                <h2>К выполнению</h2>
+                <button onclick="addTask('todo')" class="add-task-btn">+</button>
+            </div>
             <div class="kanban-cards">
                 {% for task in tasks_todo %}
                     <div class="project-card" style="padding: 15px; margin-bottom: 10px;">
@@ -46,7 +80,10 @@
         </div>
 
         <div class="kanban-column">
-            <div class="kanban-column-header"><h2>В работе</h2></div>
+            <div class="kanban-column-header">
+                <h2>В работе</h2>
+                <button onclick="addTask('todo')" class="add-task-btn">+</button>
+            </div>
             <div class="kanban-cards" style="border-color: #BEBE5F !important;">
                 {% for task in tasks_inwork %}
                     <div class="project-card" style="padding: 15px; margin-bottom: 10px;">
@@ -57,7 +94,10 @@
         </div>
 
         <div class="kanban-column">
-            <div class="kanban-column-header"><h2>Выполнено</h2></div>
+            <div class="kanban-column-header">
+                <h2>Выполнено</h2>
+                <button onclick="addTask('todo')" class="add-task-btn">+</button>
+            </div>
             <div class="kanban-cards" style="border-color: #5FBE6F !important;">
                 {% for task in tasks_done %}
                     <div class="project-card" style="padding: 15px; margin-bottom: 10px; opacity: 0.5;">
@@ -68,4 +108,61 @@
         </div>
     </div>
 </div>
+
+<script>
+function updatePaymentStatus(newStatus) {
+    const select = document.getElementById('paymentStatusSelect');
+    const projectId = "{{ project.id }}";
+
+    // 1. Сначала меняем внешний вид (UI)
+    // Удаляем все старые цветовые классы
+    select.classList.remove('paid', 'pending', 'not_paid');
+    // Добавляем новый класс, который подхватит CSS
+    select.classList.add(newStatus);
+
+    // 2. Отправляем данные на сервер (Backend)
+    fetch(`/projects/${projectId}/update_payment/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}' // Не забудь про CSRF токен для безопасности Django
+        },
+        body: JSON.stringify({
+            'payment_status': newStatus
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            alert('Ошибка при сохранении статуса');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+</script>
+
+<script>
+
+function saveField(fieldName, value) {
+    const projectId = "{{ project.id }}";
+    
+    fetch(`/projects/${projectId}/update_field/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({
+            'field': fieldName,
+            'value': value
+        })
+    })
+    .then(response => {
+        if (!response.ok) alert('Ошибка при сохранении данных');
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+</script>
 {% endblock %}
