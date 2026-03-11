@@ -161,20 +161,29 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('drop', (e) => {
         if (e.target.closest('#deleteZone')) return;
         e.preventDefault();
+        
         const activeCol = document.querySelector('.kanban-column.drop-target-active');
         if (activeCol && draggingCard) {
+            // 1. Вставляем карточку на место плейсхолдера
             const p = placeholders.get(activeCol);
             p.parentNode.replaceChild(draggingCard, p);
             
-            // ОТПРАВКА ОБНОВЛЕНИЯ (УНИВЕРСАЛЬНАЯ)
+            // 2. СОБИРАЕМ ПОРЯДОК всей колонки
+            const cards = Array.from(activeCol.querySelectorAll('.project-card'));
+            const orderList = cards.map((card, index) => ({
+                id: card.dataset.id,
+                order: index + 1 // Новые позиции от 1 до N
+            }));
+
+            // 3. Отправляем ОДИН точный запрос
             if (kanbanBoard) {
                 fetch(kanbanBoard.dataset.updateUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
                     body: JSON.stringify({ 
-                        id: draggingCard.dataset.id, 
+                        project_id: draggingCard.dataset.id, 
                         status: activeCol.dataset.status, 
-                        model: draggingCard.dataset.model 
+                        order_list: orderList 
                     })
                 });
             }
