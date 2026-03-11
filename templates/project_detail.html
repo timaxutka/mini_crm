@@ -58,7 +58,12 @@
             </div>
             <div class="kanban-cards">
                 {% for task in tasks_todo %}
-                    <div class="project-card" data-id="{{ task.id }}" data-model="Task" draggable="true" style="padding: 16px; cursor: grab;">
+                    <div class="project-card" 
+                        data-id="{{ task.id }}" 
+                        data-model="Task" 
+                        data-delete-url="{% url 'delete_task' task.id %}" 
+                        draggable="true" 
+                        style="padding: 16px; cursor: grab;">
                         <p class="title" style="font-size: 14px; margin-bottom: 5px;">{{ task.title }}</p>
                     </div>
                 {% endfor %}
@@ -72,7 +77,12 @@
             </div>
             <div class="kanban-cards">
                 {% for task in tasks_inwork %}
-                    <div class="project-card" data-id="{{ task.id }}" data-model="Task" draggable="true" style="padding: 16px; cursor: grab;">
+                    <div class="project-card" 
+                        data-id="{{ task.id }}" 
+                        data-model="Task" 
+                        data-delete-url="{% url 'delete_task' task.id %}" 
+                        draggable="true" 
+                        style="padding: 16px; cursor: grab;">
                         <p class="title" style="font-size: 14px; margin-bottom: 5px;">{{ task.title }}</p>
                     </div>
                 {% endfor %}
@@ -86,8 +96,13 @@
             </div>
             <div class="kanban-cards">
                 {% for task in tasks_done %}
-                    <div class="project-card" data-id="{{ task.id }}" data-model="Task" draggable="true" style="padding: 16px; cursor: grab; opacity: 0.5;">
-                        <p class="title" style="font-size: 14px; margin-bottom: 5px; text-decoration: line-through;">{{ task.title }}</p>
+                    <div class="project-card" 
+                        data-id="{{ task.id }}" 
+                        data-model="Task" 
+                        data-delete-url="{% url 'delete_task' task.id %}" 
+                        draggable="true" 
+                        style="padding: 16px; cursor: grab;">
+                        <p class="title" style="font-size: 14px; margin-bottom: 5px;">{{ task.title }}</p>
                     </div>
                 {% endfor %}
             </div>
@@ -106,12 +121,26 @@
                 <label style="display: block; margin-bottom: 5px; color: #aaa;">Название задачи</label>
                 <input type="text" name="title" required style="width: 100%; padding: 10px; background: #2a2a2a; border: 1px solid #444; border-radius: 6px; color: white; box-sizing: border-box;">
             </div>
-            <div class="form-group" style="margin-bottom: 20px;">
-                <label style="display: block; margin-bottom: 5px; color: #aaa;">Описание</label>
-                <textarea name="description" style="width: 100%; padding: 10px; background: #2a2a2a; border: 1px solid #444; border-radius: 6px; color: white; min-height: 80px; box-sizing: border-box; resize: vertical;"></textarea>
-            </div>
             <button type="submit" class="submit-project-btn" style="width: 100%; padding: 12px; background: white; color: black; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">Создать задачу</button>
         </form>
+    </div>
+</div>
+
+<div id="deleteZone" class="delete-zone">
+    <div class="delete-content">
+        <img src="{% static 'icons/trash.svg' %}" alt="Удалить" class="trash-icon">
+        <span>Перетащите сюда, чтобы удалить</span>
+    </div>
+</div>
+
+<div id="confirmDeleteModal" class="modal confirm-modal" style="display: none;">
+    <div class="modal-content confirm-content">
+        <div class="confirm-icon">⚠️</div>
+        <h2>Удалить задачу?</h2>
+        <div class="confirm-actions">
+            <button id="cancelDelete" class="btn-secondary">Отмена</button>
+            <button id="confirmDelete" class="btn-danger">Да, удалить</button>
+        </div>
     </div>
 </div>
 
@@ -140,7 +169,6 @@
         const title = this.querySelector('input[name="title"]').value;
         const formData = {
             title: title,
-            description: this.querySelector('textarea[name="description"]').value,
             status: status
         };
         
