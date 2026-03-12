@@ -1,0 +1,48 @@
+/* static/css/main.css */
+@import 'base/variables.css';
+@import 'layout/grid.css';
+@import 'layout/topbar.css';
+@import 'layout/sidebar.css';
+@import 'components/card.css';
+@import 'components/buttons.css';
+@import 'components/modal.css';
+@import 'components/delete.css';
+@import 'components/selectors.css';
+
+
+body {
+    display: flex;
+    margin: 0;
+    min-height: 100vh;
+    background-color: var(--bg-app);
+    font-family: 'Montserrat', sans-serif !important;
+}
+
+/* 1. Сначала жестко зададим ширину сайдбара */
+/* Найди файл sidebar.css и убедись, что он выглядит так */
+.sidebar {
+    width: 260px;       /* Жесткая ширина */
+    flex-shrink: 0;     /* Он не должен сжиматься, когда контента много */
+    height: 100vh;      /* Высота на весь экран */
+    position: sticky;   /* Чтобы не уезжал при скролле */
+    top: 0;
+}
+
+/* 2. Теперь поправим контент */
+.content {
+    flex: 1;            /* Занимает всё оставшееся место */
+    padding: 48px 30px;
+    min-width: 0;       /* ВАЖНО: чтобы не раздувало контейнер контентом */
+}
+
+.project-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 24px;
+}
+
+/*
+* {
+    outline: 1px solid red !important;
+}
+*/

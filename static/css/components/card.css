@@ -1,0 +1,85 @@
+.card {
+    background: var(--bg-card);
+    border-radius: var(--radius-main);
+    padding: var(--spacing-lg);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+    cursor: grab;
+}
+
+.card:hover {
+    border-color: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+}
+
+/* Статусный индикатор (Side accent) */
+.card--planned { border-left: 4px solid var(--status-planned); }
+.card--inwork { border-left: 4px solid var(--accent-gold); }
+
+.project-card {
+    user-select: none;           /* Запрет выделения текста */
+    -webkit-user-select: none;   /* Для Safari/Chrome */
+    -moz-user-select: none;      /* Для Firefox */
+    -ms-user-select: none;       /* Для IE/Edge */
+    
+    cursor: pointer;             /* Меняем курсор на "палец" (руку) */
+
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.project-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.project-card .title {
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--text-primary);
+}
+
+.project-card .deadline,
+.project-card .client {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.project-card .cost {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-top: auto;
+}
+
+/* Когда карточка "брошена" (дропнута), она должна мягко сесть на место */
+.project-card.dragging {
+    opacity: 0.5;
+    transform: scale(1.02);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.payment-status {
+    width: fit-content;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+
+
+/* Цвета статусов */
+.paid { color: #00FF6D; background: rgba(0, 255, 109, 0.1); }
+.not_paid { color: #FF4B4B; background: rgba(255, 75, 75, 0.1); }
+.pending { color: #FFB347; background: rgba(255, 179, 71, 0.1); }

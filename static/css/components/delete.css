@@ -1,0 +1,90 @@
+.delete-zone {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%; /* Широкая зона почти на весь экран */
+    height: 80px;
+    background: rgba(255, 69, 58, 0.05);
+    border: 2px dashed rgba(255, 69, 58, 0.3);
+    border-radius: 20px;
+    align-items: center;
+    justify-content: center;
+    color: #ff453a;
+    /* Увеличенная длительность перехода для плавности */
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s;
+    z-index: 999;
+}
+
+.delete-zone.active {
+    display: flex;
+}
+
+/* Сжатое состояние */
+.delete-zone.drag-over {
+    width: 200px; /* Сжимается до размера компактной капсулы */
+    background: rgba(255, 69, 58, 0.2);
+    border-style: solid;
+}
+
+.delete-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    transition: opacity 0.2s;
+}
+
+.delete-zone.drag-over .delete-content span {
+    display: none; /* Скрываем текст при сжатии */
+}
+
+/* Модалка подтверждения */
+.confirm-modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.confirm-content {
+    background: #1a1a1a;
+    color: #fff;
+    padding: 32px;
+    border-radius: 24px;
+    width: 450px;
+    text-align: center;
+    border: 1px solid #333;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+}
+
+.confirm-content h2 { margin: 0 0 8px 0; font-size: 20px; }
+.confirm-content p { color: #888; font-size: 14px; margin-bottom: 32px; }
+.confirm-icon { font-size: 48px; margin-bottom: 20px; display: block; }
+
+/* Контейнер действий — задаем поведение кнопок здесь */
+.confirm-actions {
+    display: flex;
+    gap: 12px;           /* Отступ между кнопками */
+    margin-top: 32px;    /* «Воздух» между текстом и кнопками */
+    width: 100%;         /* Растягиваем на всю ширину модалки */
+}
+
+/* Принудительно делаем кнопки одинаковыми через flex-item */
+.confirm-actions > button {
+    flex: 1;             /* Каждая кнопка занимает ровно 50% пространства */
+    width: 100%;         /* Убираем зависимость от размера текста внутри */
+    white-space: nowrap; /* Чтобы текст не переносился */
+}
+
+/* Опционально: чуть увеличим внутренний отступ модалки, чтобы она не казалась «сжатой» */
+.confirm-content {
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}

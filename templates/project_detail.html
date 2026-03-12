@@ -2,16 +2,14 @@
 {% load static %}
 
 {% block content %}
-<div class="content">
+<link rel="stylesheet" href="{% static 'css/main.css' %}">
+
     <div class="topbar">
         <h1>Проект: {{ project.title }}</h1>
         <div style="flex-grow: 1;"></div>
-        <a href="{% url 'projects' %}" class="add-project-btn" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">
-            ← К списку
-        </a>
     </div>
 
-    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 24px; margin-bottom: 40px;">
+    <div class="project-info-grid">
         <div style="display: flex; flex-direction: column; gap: 24px;">
             <div class="project-card">
                 <p class="deadline" style="margin-bottom: 12px;">Бюджет и Оплата</p>
@@ -51,13 +49,13 @@
     <h2 style="font-size: 14px; font-weight: 700; color: #555; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px;">Задачи проекта</h2>
     
     <div class="kanban-board" data-model="Task" data-update-url="{% url 'update_task_status' %}">
-        <div class="kanban-column" data-status="todo">
+        <div class="kanban-column" data-status="planned">
             <div class="kanban-column-header">
                 <h2>К выполнению</h2>
-                <button onclick="openTaskModal('todo')" class="open-modal-btn">+</button>
+                <button onclick="openTaskModal('planned')" class="open-modal-btn">+</button>
             </div>
             <div class="kanban-cards">
-                {% for task in tasks_todo %}
+                {% for task in tasks_planned %}
                     <div class="project-card" 
                         data-id="{{ task.id }}" 
                         data-model="Task" 
@@ -133,7 +131,7 @@
     </div>
 </div>
 
-<div id="confirmDeleteModal" class="modal confirm-modal" style="display: none;">
+<div id="confirmDeleteModal" class="modal confirm-modal">
     <div class="modal-content confirm-content">
         <div class="confirm-icon">⚠️</div>
         <h2>Удалить задачу?</h2>

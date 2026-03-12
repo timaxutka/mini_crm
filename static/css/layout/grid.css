@@ -1,0 +1,90 @@
+/* Основной контейнер канбана */
+.kanban-board {
+    display: grid;
+    /* Убираем жесткие repeat(5, 1fr) */
+    /* Теперь колонки будут растягиваться равномерно на всю ширину, 
+       сколько бы их ни было (3, 5, хоть 10) */
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    align-items: start;
+    width: 100%;
+}
+
+.kanban-column {
+    border-top: 4px solid transparent; /* Место для цветного акцента */
+    border-radius: 20px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    align-self: start;
+    transition: background 0.3s ease;
+}
+
+/* Автоматическая раскраска колонок по data-status */
+.kanban-column[data-status="planned"] { border-top: 2px solid #8e8e938a; }
+.kanban-column[data-status="inwork"] { border-top: 2px solid #ffcc008a; }
+.kanban-column[data-status="done"] { border-top: 2px solid #34c7598a; }
+.kanban-column[data-status="overdue"] { border-top: 2px solid #ff3b308a; }
+.kanban-column[data-status="paused"] { border-top: 2px solid #5856d68a; }
+
+/* Добавляем легкий фоновый оттенок (опционально) */
+.kanban-column[data-status="planned"] { background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.02) 100%); }
+.kanban-column[data-status="inwork"] { background: linear-gradient(180deg, rgba(255, 204, 0, 0.1) 0%, rgba(255, 255, 255, 0.02) 100%); }
+.kanban-column[data-status="done"] { background: linear-gradient(180deg, rgba(13, 255, 0, 0.1) 0%, rgba(255, 255, 255, 0.02) 100%); }
+.kanban-column[data-status="overdue"] { background: linear-gradient(180deg, rgba(255, 0, 0, 0.1) 0%, rgba(255, 255, 255, 0.02) 100%); }
+.kanban-column[data-status="paused"] { background: linear-gradient(180deg, rgba(64, 0, 255, 0.1) 0%, rgba(255, 255, 255, 0.02) 100%); }
+
+
+
+
+.kanban-column-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    flex-shrink: 0;     /* Заголовок не сжимается */
+}
+
+.kanban-column-header h2 {
+    font-size: 14px;
+    letter-spacing: 0.1em;
+    color: var(--text-secondary);
+}
+
+/* Контейнер карточек внутри колонки */
+/* Контейнер карточек: важно иметь transition для плавного сдвига */
+.kanban-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    /* Плавность сдвига карточек при вставке */
+    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Ключ к успеху: ПЛЕЙСХОЛДЕР */
+.kanban-placeholder {
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px dashed rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    margin: 0;
+    /* Плавное изменение размера плейсхолдера */
+    transition: height 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), 
+                opacity 0.3s ease;
+    opacity: 0;
+}
+
+.kanban-placeholder.visible {
+    opacity: 1; /* Показываем его только когда JS добавляет класс */
+}
+
+/* Анимация самих карточек */
+.project-card {
+    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), 
+                box-shadow 0.3s ease;
+}
+
+.project-card.dragging {
+    opacity: 0.5;
+    transform: scale(0.95);
+}

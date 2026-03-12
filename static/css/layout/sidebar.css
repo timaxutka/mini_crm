@@ -1,0 +1,82 @@
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 260px; /* Уменьшили для более изящного вида */
+    height: 100vh;
+    background-color: var(--bg-surface);
+    padding: 40px 20px;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.logo {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 50px;
+    padding-left: 10px;
+    letter-spacing: -0.5px;
+}
+
+.nav-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.nav-item a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+/* Эффект при наведении — Apple-style (чуть ярче фон) */
+.nav-item a:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+}
+
+/* Активный пункт — тонкая полоска или мягкий фон */
+.nav-item.active a {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+/* Полностью сбрасываем стили списка, чтобы убрать маркеры */
+.nav-list {
+    list-style: none !important; /* Убираем маркеры */
+    padding: 0 !important;       /* Убираем отступы */
+    margin: 0 !important;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;                 /* Растягиваем контейнер */
+}
+
+.nav-item {
+    width: 100%;                 /* Элемент списка занимает 100% ширины */
+}
+
+/* Растягиваем саму ссылку */
+.nav-item a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 14px;
+    width: 100%;                 /* Ссылка теперь растягивается на весь навбар */
+    box-sizing: border-box;      /* Чтобы padding не вылезал за границы */
+    transition: all 0.2s ease;
+}

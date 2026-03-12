@@ -1,0 +1,87 @@
+.open-modal-btn {
+    background: rgba(255, 255, 255, 0.05); /* Едва заметный фон */
+    border: none;
+    border-radius: 50%; /* Идеальный круг */
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    font-size: 16px;
+    font-weight: 400;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.open-modal-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    transform: scale(1.05);
+}
+
+.open-modal-btn:active {
+    transform: scale(0.95);
+}
+
+.add-project-btn {
+    background: linear-gradient(180deg, #ffffff 0%, #ffffff 100%);
+    color: #000; /* Черный текст на желтом фоне читается лучше всего */
+    border: none;
+    height: 56px;
+    padding: 10px 20px;
+    border-radius: 16px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(255, 204, 0, 0.2);
+    
+    /* Защита от выделения текста, как на карточках */
+    user-select: none;
+    -webkit-user-select: none;
+
+    flex-shrink: 0;       /* Кнопка не будет уменьшаться под давлением соседей */
+    white-space: nowrap;  /* Запрещаем перенос текста на новую строку */
+    min-width: fit-content; /* Ширина всегда по размеру текста */
+}
+
+.add-project-btn:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.1);
+}
+
+.add-project-btn:active {
+    transform: translateY(0) scale(0.96);
+    filter: brightness(0.95);
+}
+
+/* Добавим иконку "+" через псевдоэлемент, если захочешь */
+.add-project-btn::before {
+    content: '+';
+    font-size: 18px;
+    line-height: 1;
+    font-weight: 400;
+}
+
+.btn-danger {
+    background: #ff453a;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 12px;
+    color: #fff;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn-secondary {
+    background: #333;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 12px;
+    color: #fff;
+    cursor: pointer;
+}

@@ -104,8 +104,18 @@ document.addEventListener('DOMContentLoaded', () => {
             itemToDelete = { id: draggingCard.dataset.id, model: draggingCard.dataset.model };
             if (confirmDeleteModal) confirmDeleteModal.style.display = 'flex';
         });
-        deleteZone.addEventListener('dragover', (e) => { e.preventDefault(); deleteZone.classList.add('drag-over'); });
-        deleteZone.addEventListener('dragleave', () => deleteZone.classList.remove('drag-over'));
+        deleteZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            clearTimeout(dragLeaveTimer); // Отменяем возврат, если мы все еще тут
+            deleteZone.classList.add('drag-over');
+        });
+
+        deleteZone.addEventListener('dragleave', (e) => {
+            // Задержка перед расширением (300мс)
+            dragLeaveTimer = setTimeout(() => {
+                deleteZone.classList.remove('drag-over');
+            }, 300);
+        });
     }
 
     btnConfirmDelete?.addEventListener('click', () => {

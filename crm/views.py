@@ -116,7 +116,7 @@ def project_detail(request, project_id):
 
     return render(request, 'project_detail.html', {
         'project': project,
-        'tasks_todo': tasks.filter(status='todo'),
+        'tasks_planned': tasks.filter(status='planned'),
         'tasks_inwork': tasks.filter(status='inwork'),
         'tasks_done': tasks.filter(status='done'),
     })
@@ -188,7 +188,7 @@ def add_task(request, project_id):
         task = Task.objects.create(
             project=project,
             title=data.get('title'),
-            status=data.get('status', 'todo'),
+            status=data.get('status', 'planned'),
         )
         
         # 4. Успешный ответ

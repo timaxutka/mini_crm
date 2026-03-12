@@ -4,12 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <title>MiniCRM</title>
-    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="stylesheet" href="{% static 'static/css/main.css' %}">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;800&display=swap" rel="stylesheet">
 </head>
 <body>
     <nav class="sidebar">
-        <h1 class="logo"><span class="fm">FM</span>CRM</h1>
         <ul class="nav-list">
             <li class="nav-item {% if request.path == '/projects/' or request.path == '/' %}active{% endif %}">
                 <a href="{% url 'projects' %}">
@@ -42,12 +41,6 @@
                 </a>
             </li>
         </ul>
-        <div class="settings {% if request.path == '/settings/' %}active{% endif %}">
-            <a href="#">
-                <img src="{% static 'icons/settings.svg' %}" alt="Настройки">
-                <span>Настройки</span>
-            </a>
-        </div>
     </nav>
     <main class="content">
         {% block content %}

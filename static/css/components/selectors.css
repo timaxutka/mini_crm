@@ -1,0 +1,24 @@
+.payment-status-dropdown {
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #333;
+    background: #1a1a1a;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    appearance: none; /* Убираем стандартную стрелочку */
+    background-image: url("data:image/svg+xml;utf8,<svg fill='white' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+}
+
+/* Цвета для состояний */
+.payment-status-dropdown.paid { border-color: #34c759; color: #34c759; }
+.payment-status-dropdown.pending { border-color: #ffcc00; color: #ffcc00; }
+.payment-status-dropdown.not_paid { border-color: #ff3b30; color: #ff3b30; }
+
+.payment-status-dropdown:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(255,255,255,0.1);
+}
