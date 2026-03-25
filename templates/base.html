@@ -48,7 +48,6 @@
                 <span class="username" title="Имя пользователя">Максим Е.</span>
                 <div class="profile-actions">
                     <img src="{% static 'icons/settings.svg' %}" alt="Настройки" class="icon-btn">
-                    <img src="{% static 'icons/logout.svg' %}" alt="Выход" class="icon-btn">
                 </div>
             </div>
         </div>
@@ -68,17 +67,35 @@
             </div>
             
             <div class="modal-body" style="padding: 20px 0;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span style="color: var(--text-primary); font-size: 16px;">Светлая тема (для презентации)</span>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <span style="color: var(--text-primary); font-size: 16px;">Светлая тема</span>
                     <label class="theme-switch">
                         <input type="checkbox" id="themeCheckbox">
                         <span class="theme-slider"></span>
                     </label>
                 </div>
-            </div>
 
-            <div class="modal-footer" style="margin-top: 20px;">
-                <button type="button" class="submit-project-btn" id="saveSettingsBtn">Готово</button>
+                <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 20px 0;">
+
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: var(--text-primary); font-size: 16px;">Аккаунт</span>
+                    <button type="button" class="btn-danger" id="logoutRequestBtn" style="padding: 8px 16px; font-size: 14px;">Выйти</button>
+                </div>
+            </div>
+            </div>
+    </div>
+
+    <div id="confirmLogoutModal" class="modal confirm-modal" style="display: none;">
+        <div class="modal-content confirm-content">
+            <div class="confirm-icon">🚪</div>
+            <h2>Завершить сеанс?</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 20px;">Вы уверены, что хотите выйти из системы?</p>
+            <div class="confirm-actions">
+                <button id="cancelLogout" class="btn-secondary">Отмена</button>
+                <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-danger">Да, выйти</button>
+                </form>
             </div>
         </div>
     </div>
@@ -87,46 +104,56 @@
         document.addEventListener('DOMContentLoaded', () => {
             const settingsModal = document.getElementById('settingsModal');
             const themeCheckbox = document.getElementById('themeCheckbox');
-            
-            // Ищем ту самую иконку в сайдбаре по alt
             const settingsIcon = document.querySelector('img[alt="Настройки"]');
-            const closeBtn = document.getElementById('closeSettings');
-            const saveBtn = document.getElementById('saveSettingsBtn');
+            const closeSettingsBtn = document.getElementById('closeSettings');
 
-            // 1. Проверка сохраненной темы при загрузке
+            const logoutRequestBtn = document.getElementById('logoutRequestBtn');
+            const confirmLogoutModal = document.getElementById('confirmLogoutModal');
+            const cancelLogoutBtn = document.getElementById('cancelLogout');
+
+            // --- 1. ТЕМА ---
             if (localStorage.getItem('theme') === 'light') {
                 document.body.setAttribute('data-theme', 'light');
-                themeCheckbox.checked = true;
+                if (themeCheckbox) themeCheckbox.checked = true;
             }
 
-            // 2. Открытие модалки настроек
-            if (settingsIcon) {
-                settingsIcon.style.cursor = 'pointer'; // Чтобы было понятно, что кликабельно
-                settingsIcon.onclick = () => {
-                    settingsModal.style.display = 'flex';
+            if (themeCheckbox) {
+                themeCheckbox.onchange = () => {
+                    if (themeCheckbox.checked) {
+                        document.body.setAttribute('data-theme', 'light');
+                        localStorage.setItem('theme', 'light');
+                    } else {
+                        document.body.removeAttribute('data-theme');
+                        localStorage.setItem('theme', 'dark');
+                    }
                 };
             }
 
-            // 3. Закрытие
-            const closeModal = () => settingsModal.style.display = 'none';
-            closeBtn.onclick = closeModal;
-            saveBtn.onclick = closeModal;
-            
-            // Закрытие по клику вне модалки
-            window.onclick = (event) => {
-                if (event.target == settingsModal) closeModal();
-            };
+            // --- 2. УПРАВЛЕНИЕ НАСТРОЙКАМИ ---
+            const closeSettings = () => { settingsModal.style.display = 'none'; };
 
-            // 4. Логика переключения
-            themeCheckbox.onchange = () => {
-                if (themeCheckbox.checked) {
-                    document.body.setAttribute('data-theme', 'light');
-                    localStorage.setItem('theme', 'light');
-                } else {
-                    document.body.removeAttribute('data-theme');
-                    localStorage.setItem('theme', 'dark');
-                }
-            };
+            if (settingsIcon) {
+                settingsIcon.onclick = () => { settingsModal.style.display = 'flex'; };
+            }
+
+            if (closeSettingsBtn) closeSettingsBtn.onclick = closeSettings;
+
+            // --- 3. ВЫХОД ---
+            if (logoutRequestBtn) {
+                logoutRequestBtn.onclick = () => {
+                    closeSettings();
+                    confirmLogoutModal.style.display = 'flex';
+                };
+            }
+
+            const closeLogoutModal = () => { confirmLogoutModal.style.display = 'none'; };
+            if (cancelLogoutBtn) cancelLogoutBtn.onclick = closeLogoutModal;
+
+            // --- 4. КЛИК ВНЕ МОДАЛОК ---
+            window.addEventListener('click', (event) => {
+                if (event.target === settingsModal) closeSettings();
+                if (event.target === confirmLogoutModal) closeLogoutModal();
+            });
         });
     </script>
 </body>

@@ -1,0 +1,73 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход в систему | mini_crm</title>
+    <link rel="stylesheet" href="{% static 'css/components/auth.css' %}">
+</head>
+
+<body class="auth-page">
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="logo-circle">
+                    <img src="{% static 'icons/logo.svg' %}" alt="Logo">
+                </div>
+                <h1 id="auth-title">С возвращением</h1>
+                <p id="auth-subtitle">Введите данные для входа в CRM</p>
+            </div>
+
+            <form method="post" id="auth-form">
+                {% csrf_token %}
+                <div class="input-group">
+                    <label>Логин</label>
+                    <input type="text" name="username" placeholder="maksim_timofeev" required>
+                </div>
+                <div class="input-group">
+                    <label>Пароль</label>
+                    <input type="password" name="password" placeholder="••••••••" required>
+                </div>
+
+                {% if form.errors %}
+                <div class="auth-error">
+                    Неверный логин или пароль.
+                </div>
+                {% endif %}
+
+                <button type="submit" class="auth-btn">Войти в систему</button>
+            </form>
+
+            <div class="auth-footer">
+                <span>Нет аккаунта?</span>
+                <a href="#" id="toggle-auth">Создать профиль</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const toggleBtn = document.getElementById('toggle-auth');
+        const title = document.getElementById('auth-title');
+        const subtitle = document.getElementById('auth-subtitle');
+        const btn = document.querySelector('.auth-btn');
+        let isLogin = true;
+
+        toggleBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            isLogin = !isLogin;
+            if (!isLogin) {
+                title.innerText = 'Регистрация';
+                subtitle.innerText = 'Создайте аккаунт для работы';
+                btn.innerText = 'Зарегистрироваться';
+                toggleBtn.innerText = 'Уже есть аккаунт?';
+            } else {
+                title.innerText = 'С возвращением';
+                subtitle.innerText = 'Введите данные для входа';
+                btn.innerText = 'Войти в систему';
+                toggleBtn.innerText = 'Создать профиль';
+            }
+        });
+    </script>
+</body>
+</html>

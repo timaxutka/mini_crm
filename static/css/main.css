@@ -11,6 +11,8 @@
 @import 'components/table.css';
 @import 'components/task.css';
 @import 'components/finance.css';
+@import 'components/switch.css';
+@import 'components/auth.css';
 
 body {
     display: flex;

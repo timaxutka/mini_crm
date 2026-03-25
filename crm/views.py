@@ -14,6 +14,8 @@ from django.db.models.functions import TruncDay, TruncMonth
 
 from .models import Project, Client, Task
 
+from django.contrib.auth.views import LoginView
+
 # --- СТРАНИЦЫ ---
 
 def projects(request):
@@ -259,3 +261,13 @@ def toggle_client_vip(request, client_id):
 
 def calculator(request): return render(request, 'calculator.html')
 def settings(request): return render(request, 'settings.html')
+
+class MyLoginView(LoginView):
+    template_name = 'registration/login.html'
+    # После успешного входа редиректим на главную (канбан)
+    next_page = 'dashboard'
+
+def kanban_view(request):
+    # Тут будет логика получения данных из БД
+    # Пока просто отдаем твой HTML-шаблон
+    return render(request, 'projects.html')

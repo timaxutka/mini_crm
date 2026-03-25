@@ -1,7 +1,11 @@
 from django.urls import path
 from . import views
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
+    path('kanban/', views.projects, name='dashboard'), # Было views.kanban_view
+    path('login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
+    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('', views.projects, name='projects'),
     path('projects/', views.projects, name='projects'),
     path('clients/', views.client_projects_view, name='clients'),

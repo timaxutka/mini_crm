@@ -58,7 +58,7 @@ ROOT_URLCONF = 'fmcrm.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -125,5 +125,14 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Куда переходить после успешного входа
+LOGIN_REDIRECT_URL = 'dashboard' 
+
+# Куда перекидывать, если неавторизованный юзер ломится на закрытую страницу
+LOGIN_URL = 'login'
+
 TEMPLATES[0]['DIRS'] = [os.path.join(BASE_DIR, 'templates')]
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+
+# Куда летим ПОСЛЕ ВЫХОДА
+LOGOUT_REDIRECT_URL = 'login'
