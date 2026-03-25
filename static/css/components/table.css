@@ -1,0 +1,270 @@
+/* Контейнер таблицы = карточка */
+.table-container {
+    padding: 0; /* Убираем отступ, чтобы таблица касалась краев */
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    overflow: hidden; /* Важно: чтобы радиус контейнера обрезал таблицу */
+}
+
+
+
+/* Таблица */
+.crm-table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse; /* Меняем на collapse для плотности */
+    border-spacing: 0;
+    color: var(--text-primary);
+}
+
+/* 2. Задаем размеры колонок */
+.crm-table th:nth-child(1), .crm-table td:nth-child(1) { width: 25%; } /* Клиент */
+.crm-table th:nth-child(2), .crm-table td:nth-child(2) { width: 35%; } /* Проект */
+.crm-table th:nth-child(3), .crm-table td:nth-child(3) { width: 15%; } /* Статус */
+.crm-table th:nth-child(4), .crm-table td:nth-child(4) { width: 15%; } /* Бюджет */
+.crm-table th:nth-child(5), .crm-table td:nth-child(5) { width: 10%; } /* Оплата */
+
+/* 3. Дополнительно: защита от длинного текста (обрезаем троеточием) */
+.crm-table td {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Строка = мини карточка */
+.crm-table tr {
+    background: var(--bg-card);
+    transition: all 0.25s ease;
+}
+
+.crm-table tr:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255,255,255,0.15);
+}
+
+/* Ячейки */
+.crm-table td {
+    padding: 16px 20px;
+
+    border-top: 1px solid rgba(255,255,255,0.05);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.crm-table td:first-child {
+    border-left: 1px solid rgba(255,255,255,0.05);
+    border-radius: 16px 0 0 16px;
+}
+
+.crm-table td:last-child {
+    border-right: 1px solid rgba(255,255,255,0.05);
+    border-radius: 0 16px 16px 0;
+}
+
+.crm-table thead th {
+    text-align: left !important; /* Убираем центрирование браузера */
+    padding: 12px 20px;         /* Синхронизируем с padding ячеек td */
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Клиент */
+.client-name {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* Название проекта */
+.project-link {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-decoration: none;
+}
+
+.project-link:hover {
+    color: var(--text-secondary);
+}
+
+/* Метаданные */
+.project-date {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+/* Дедлайн */
+.deadline-cell {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+/* Бюджет */
+.budget-cell {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+/* Payment indicator (точка) */
+.payment-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 8px;
+}
+
+/* Используем те же цвета что в карточках */
+.payment-indicator.paid { background: #00FF6D; }
+.payment-indicator.not_paid { background: #FF4B4B; }
+.payment-indicator.pending { background: #FFB347; }
+
+/* Payment text */
+.payment-text {
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.payment-text.paid { color: #00FF6D; }
+.payment-text.not_paid { color: #FF4B4B; }
+.payment-text.pending { color: #FFB347; }
+
+/* Пустая строка */
+.empty-row {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-secondary);
+}
+
+/* Базовый стиль бейджа статуса */
+.status-badge {
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-block;
+}
+
+/* Привязка к твоим переменным */
+.status-badge.planned { background: rgba(142, 142, 147, 0.1); color: var(--col-planned); }
+.status-badge.inwork  { background: rgba(255, 204, 0, 0.1);  color: var(--col-inwork); }
+.status-badge.done    { background: rgba(52, 199, 89, 0.1);  color: var(--col-done); }
+.status-badge.overdue { background: rgba(255, 59, 48, 0.1);  color: var(--col-overdue); }
+.status-badge.paused  { background: rgba(88, 86, 214, 0.1);  color: var(--col-paused); }
+
+/* Специфичный отступ только для страницы клиентов */
+.clients-page-search {
+    margin-bottom: 24px; /* Увеличили отступ для визуального "воздуха" */
+}
+
+.crm-table thead th select {
+    background: transparent;
+    color: var(--text-secondary);
+    border: none;
+    font-size: 12px;
+    text-transform: uppercase;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.crm-table thead th button {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 10px;
+}
+
+.sort-icon {
+    width: 14px;
+    height: 14px;
+    margin-left: 6px;
+    vertical-align: middle;
+    transition: transform 0.2s;
+    fill: var(--text-secondary);
+}
+
+.sort-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+}
+
+/* --- СВЕТЛАЯ ТЕМА ДЛЯ ТАБЛИЦ (СТАРЫЕ СТИЛИ НЕ ТРОГАЕМ) --- */
+
+[data-theme="light"] .table-container {
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    border-color: #ffffff;
+}
+
+[data-theme="light"] .crm-table {
+    color: var(--text-primary);
+}
+
+[data-theme="light"] .crm-table tr {
+    background: #ffffff;
+}
+
+/* Эффект при наведении в светлой теме (нежный серый) */
+[data-theme="light"] .crm-table tr:hover {
+    background: #f9f9fb;
+    transform: none; /* Убираем translateY, чтобы таблица не "прыгала" при чтении строк */
+}
+
+[data-theme="light"] .crm-table td {
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+}
+
+[data-theme="light"] .crm-table thead th {
+    background: #f2f2f7;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* Ссылки и названия в таблице */
+[data-theme="light"] .project-link,
+[data-theme="light"] .client-name,
+[data-theme="light"] .budget-cell {
+    color: #000000;
+}
+
+[data-theme="light"] .project-link:hover {
+    color: #007aff; /* Синий акцент Apple при наведении */
+}
+
+/* Бейджи статусов (делаем цвета чуть гуще для белого фона) */
+[data-theme="light"] .status-badge.planned { background: #e5e5ea; color: #636366; }
+[data-theme="light"] .status-badge.inwork  { background: rgba(255, 204, 0, 0.2); color: #8a6d00; }
+[data-theme="light"] .status-badge.done    { background: rgba(52, 199, 89, 0.15); color: #1a8a43; }
+[data-theme="light"] .status-badge.overdue { background: rgba(255, 59, 48, 0.15); color: #c9302c; }
+[data-theme="light"] .status-badge.paused  { background: rgba(88, 86, 214, 0.15); color: #434190; }
+
+/* Индикаторы оплаты (точки) */
+[data-theme="light"] .payment-indicator.paid { background: #34c759; }
+[data-theme="light"] .payment-indicator.not_paid { background: #ff3b30; }
+[data-theme="light"] .payment-indicator.pending { background: #ffcc00; }
+
+[data-theme="light"] .payment-text.paid { color: #1a8a43; }
+[data-theme="light"] .payment-text.not_paid { color: #c9302c; }
+[data-theme="light"] .payment-text.pending { color: #8a6d00; }
+
+/* Сортировка и селекторы в шапке */
+[data-theme="light"] .crm-table thead th select,
+[data-theme="light"] .crm-table thead th button {
+    color: var(--text-secondary);
+}
+
+[data-theme="light"] .sort-icon {
+    fill: var(--text-secondary);
+}

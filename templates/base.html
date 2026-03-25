@@ -41,10 +41,93 @@
                 </a>
             </li>
         </ul>
+
+        <div class="sidebar-profile">
+            <div class="profile-bar">
+                <img src="{% static 'icons/avatar.png' %}" alt="Аватар" class="avatar">
+                <span class="username" title="Имя пользователя">Максим Е.</span>
+                <div class="profile-actions">
+                    <img src="{% static 'icons/settings.svg' %}" alt="Настройки" class="icon-btn">
+                    <img src="{% static 'icons/logout.svg' %}" alt="Выход" class="icon-btn">
+                </div>
+            </div>
+        </div>
     </nav>
+
+    
     <main class="content">
         {% block content %}
         {% endblock %}
     </main>
+
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Настройки интерфейса</h2>
+                <span class="close-modal" id="closeSettings">&times;</span>
+            </div>
+            
+            <div class="modal-body" style="padding: 20px 0;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: var(--text-primary); font-size: 16px;">Светлая тема (для презентации)</span>
+                    <label class="theme-switch">
+                        <input type="checkbox" id="themeCheckbox">
+                        <span class="theme-slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="modal-footer" style="margin-top: 20px;">
+                <button type="button" class="submit-project-btn" id="saveSettingsBtn">Готово</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const settingsModal = document.getElementById('settingsModal');
+            const themeCheckbox = document.getElementById('themeCheckbox');
+            
+            // Ищем ту самую иконку в сайдбаре по alt
+            const settingsIcon = document.querySelector('img[alt="Настройки"]');
+            const closeBtn = document.getElementById('closeSettings');
+            const saveBtn = document.getElementById('saveSettingsBtn');
+
+            // 1. Проверка сохраненной темы при загрузке
+            if (localStorage.getItem('theme') === 'light') {
+                document.body.setAttribute('data-theme', 'light');
+                themeCheckbox.checked = true;
+            }
+
+            // 2. Открытие модалки настроек
+            if (settingsIcon) {
+                settingsIcon.style.cursor = 'pointer'; // Чтобы было понятно, что кликабельно
+                settingsIcon.onclick = () => {
+                    settingsModal.style.display = 'flex';
+                };
+            }
+
+            // 3. Закрытие
+            const closeModal = () => settingsModal.style.display = 'none';
+            closeBtn.onclick = closeModal;
+            saveBtn.onclick = closeModal;
+            
+            // Закрытие по клику вне модалки
+            window.onclick = (event) => {
+                if (event.target == settingsModal) closeModal();
+            };
+
+            // 4. Логика переключения
+            themeCheckbox.onchange = () => {
+                if (themeCheckbox.checked) {
+                    document.body.setAttribute('data-theme', 'light');
+                    localStorage.setItem('theme', 'light');
+                } else {
+                    document.body.removeAttribute('data-theme');
+                    localStorage.setItem('theme', 'dark');
+                }
+            };
+        });
+    </script>
 </body>
 </html>

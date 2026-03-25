@@ -154,3 +154,68 @@ input[type=number]::-webkit-inner-spin-button {
 input[type=number] {
     -moz-appearance: textfield;
 }
+
+/* --- СВЕТЛАЯ ТЕМА ДЛЯ МОДАЛОК (СТАРЫЕ СТИЛИ НЕ ТРОГАЕМ) --- */
+
+[data-theme="light"] .modal {
+    background: rgba(255, 255, 255, 0.4); /* Светлый блюр */
+}
+
+[data-theme="light"] .modal-content {
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 30px 90px rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="light"] .modal-header h2 {
+    color: #000000;
+}
+
+/* Инпуты и формы */
+[data-theme="light"] .form-group input,
+[data-theme="light"] #manualCostBlock input {
+    background: #f2f2f7; /* Светло-серый фон инпута */
+    border: 1px solid var(--border-color);
+    color: #000000;
+}
+
+[data-theme="light"] .form-group input:focus,
+[data-theme="light"] #manualCostBlock input:focus {
+    background: #ffffff;
+    border-color: #007aff; /* Синий фокус в стиле Apple */
+    box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
+}
+
+/* Переключатель (Toggle Group) */
+[data-theme="light"] .toggle-group {
+    background: #e5e5ea;
+}
+
+[data-theme="light"] .toggle-btn.active {
+    background: #ffffff;
+    color: #000000;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .toggle-btn:not(.active) {
+    color: #636366;
+}
+
+/* Кнопка сохранения в светлой теме */
+[data-theme="light"] .submit-project-btn {
+    background: #1c1c1e; /* Черная кнопка на белой модалке */
+    color: #ffffff;
+}
+
+[data-theme="light"] .submit-project-btn:hover {
+    background: #000000;
+}
+
+/* Крестик закрытия */
+[data-theme="light"] .close-modal {
+    color: #8e8e93;
+}
+
+[data-theme="light"] .close-modal:hover {
+    color: #000000;
+}

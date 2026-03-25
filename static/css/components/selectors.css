@@ -8,7 +8,7 @@
     cursor: pointer;
     transition: all 0.3s ease;
     appearance: none; /* Убираем стандартную стрелочку */
-    background-image: url("data:image/svg+xml;utf8,<svg fill='white' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+    /* background-image: url("data:image/svg+xml;utf8,<svg fill='white' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>"); */
     background-repeat: no-repeat;
     background-position: right 10px center;
 }
@@ -21,4 +21,35 @@
 .payment-status-dropdown:focus {
     outline: none;
     box-shadow: 0 0 0 2px rgba(255,255,255,0.1);
+}
+
+/* --- СВЕТЛАЯ ТЕМА ДЛЯ СЕЛЕКТОРОВ (СТАРЫЕ СТИЛИ НЕ ТРОГАЕМ) --- */
+
+[data-theme="light"] .payment-status-dropdown {
+    background-color: #ffffff;
+    border: 1px solid var(--border-color);
+    color: #000000;
+    /* Меняем белую стрелочку на черную через инвертированный SVG */
+    /* background-image: url("data:image/svg+xml;utf8,<svg fill='black' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>"); */
+}
+
+/* Статусы в светлой теме делаем чуть темнее для читаемости на белом */
+[data-theme="light"] .payment-status-dropdown.paid { 
+    border-color: #248a3d; 
+    color: #248a3d; 
+}
+
+[data-theme="light"] .payment-status-dropdown.pending { 
+    border-color: #b8860b; 
+    color: #b8860b; 
+}
+
+[data-theme="light"] .payment-status-dropdown.not_paid { 
+    border-color: #c9302c; 
+    color: #c9302c; 
+}
+
+[data-theme="light"] .payment-status-dropdown:focus {
+    box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.15);
+    border-color: #007aff;
 }

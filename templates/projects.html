@@ -2,24 +2,14 @@
 {% load static format_currency %}
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/main.css' %}">
-
-<div class="topbar">
-    <div class="search-bar">
-        <img src="{% static 'icons/search.svg' %}" alt="Поиск" class="icon">
-        <input type="text" placeholder="Поиск">
-    </div>
-    <button class="add-project-btn open-modal-btn" data-status="planned">Добавить проект</button>
-    <div class="profile-bar">
-        <img src="{% static 'icons/avatar.png' %}" alt="Аватар" class="avatar">
-        <span class="username" title="Имя пользователя">Максим Е.</span>
-        <div class="profile-actions">
-            <img src="{% static 'icons/settings.svg' %}" alt="Настройки" class="icon-btn">
-            <img src="{% static 'icons/logout.svg' %}" alt="Выход" class="icon-btn">
-        </div>
-    </div>
-</div>
+<script src="{% static 'js/search.js' %}"></script>
 
 <h1>Мои проекты</h1>
+<div class="search-bar" style="margin-bottom: 24px;">
+    <img src="{% static 'icons/search.svg' %}" alt="Поиск" class="icon" style="opacity: 0.5; width: 20px;">
+    <input type="text" id="kanbanSearch" placeholder="Поиск по проектам или клиентам..." 
+           onkeyup="universalSearch('kanbanSearch', '.kanban-board', '.project-card')">
+</div>
 
 <div class="kanban-board" data-model="Project" data-update-url="/update_status/">
 
@@ -133,34 +123,31 @@
         <form id="addProjectForm">
             {% csrf_token %}
             <input type="hidden" id="modalStatus" name="status" value="planned">
+            
             <div class="form-group">
                 <label>Название проекта</label>
                 <input type="text" name="title" placeholder="Введите название" required>
             </div>
+
             <div class="form-row">
-                <div class="form-group"><label>Клиент</label><input type="text" name="client" placeholder="Имя клиента"></div>
-                <div class="form-group"><label>Дедлайн</label><input type="date" name="deadline"></div>
-            </div>
-            <div class="cost-section">
-                <div class="section-header">
-                    <label>Стоимость</label>
-                    <div class="toggle-group">
-                        <button type="button" class="toggle-btn active" data-mode="manual">Вручную</button>
-                        <button type="button" class="toggle-btn" data-mode="calc">Калькулятор</button>
-                    </div>
+                <div class="form-group">
+                    <label>Клиент</label>
+                    <input type="text" name="client" placeholder="Имя клиента">
                 </div>
-                <div id="manualCostBlock">
-                    <input type="number" name="budget" id="manualPrice" placeholder="Введите сумму (₽)" step="0.01">
-                </div>
-                
-                <div id="calcCostBlock" style="display: none;">
-                    <div class="estimate-rows" id="estimateRows"></div>
-                    <button type="button" class="add-row-btn" id="addServiceRow">+ Добавить услугу</button>
-                    <div class="calc-total">Итого: <span id="totalDisplay">0</span> ₽</div>
-                    <input type="hidden" name="budget" id="calcPriceInput" value="0">
+                <div class="form-group">
+                    <label>Дедлайн</label>
+                    <input type="date" name="deadline">
                 </div>
             </div>
-            <div class="modal-footer"><button type="submit" class="submit-project-btn">Создать проект</button></div>
+
+            <div class="form-group">
+                <label>Бюджет (₽)</label>
+                <input type="number" name="budget" placeholder="0.00" step="0.01">
+            </div>
+
+            <div class="modal-footer">
+                <button type="submit" class="submit-project-btn">Создать проект</button>
+            </div>
         </form>
     </div>
 </div>
@@ -184,4 +171,43 @@
 </div>
 
 <script src="{% static 'kanban.js' %}"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const budgetInput = document.getElementById('finalBudgetInput');
+    const totalDisplay = document.getElementById('totalDisplay');
+    const toggleBtns = document.querySelectorAll('.toggle-btn');
+    const manualBlock = document.getElementById('manualCostBlock');
+    const calcBlock = document.getElementById('calcCostBlock');
+
+    // Переключение режимов (Ручной / Калькулятор)
+    toggleBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            toggleBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            if (btn.dataset.mode === 'calc') {
+                manualBlock.style.display = 'none';
+                calcBlock.style.display = 'block';
+            } else {
+                manualBlock.style.display = 'block';
+                calcBlock.style.display = 'none';
+            }
+        });
+    });
+
+    // Наблюдатель за калькулятором: как только сумма в калькуляторе меняется, 
+    // мы записываем её в основное поле budget.
+    const observer = new MutationObserver(() => {
+        const isCalc = document.querySelector('.toggle-btn[data-mode="calc"]').classList.contains('active');
+        if (isCalc) {
+            budgetInput.value = totalDisplay.innerText.replace(/\s/g, '');
+        }
+    });
+
+    if (totalDisplay) {
+        observer.observe(totalDisplay, { childList: true, characterData: true, subtree: true });
+    }
+});
+</script>
 {% endblock %}

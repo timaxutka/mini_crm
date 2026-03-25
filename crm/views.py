@@ -1,15 +1,20 @@
+import json
+import calendar
+from datetime import timedelta, date
+from decimal import Decimal, InvalidOperation
+
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.db import transaction
-import json
 from django.db.models import Sum, Q, Count, Prefetch
 from django.utils import timezone
-from django.db.models import Sum
 from django.views.decorators.http import require_POST
+from django.db.models.functions import TruncDay, TruncMonth
 
 from .models import Project, Client, Task
 
+# --- СТРАНИЦЫ ---
 
 def projects(request):
     planned = Project.objects.filter(status='planned').order_by('order', 'id')
@@ -26,109 +31,95 @@ def projects(request):
     })
 
 def client_projects_view(request):
-    # Получаем все проекты, подтягивая данные клиентов одним запросом
-    # Сортируем сначала по имени клиента, потом по дате проекта
-    all_projects = Project.objects.select_related('client').all().order_by('client__name', '-start_date')
-    
+    all_projects = Project.objects.select_related('client').all().order_by('-start_date')
     return render(request, 'clients.html', {'projects': all_projects})
 
 def tasks(request):
-    all_tasks = Task.objects.select_related('project', 'project__client').all()
+    today = date.today()
+    base_tasks = Task.objects.select_related('project', 'project__client').exclude(status='done')
     
-    # Сортируем просто по дате создания
-    active_tasks = all_tasks.exclude(status='done').order_by('-created_at')
-    # Так как поля due_date нет, мы не можем высчитать просроченные
-    overdue_tasks = [] 
-    completed_tasks = all_tasks.filter(status='done').order_by('-id')[:10]
+    overdue = base_tasks.filter(due_date__lt=today).order_by('due_date')
+    active = base_tasks.filter(due_date__gte=today).order_by('due_date')
+    no_date = base_tasks.filter(due_date__isnull=True).order_by('-created_at')
+    
+    active_tasks = list(overdue) + list(active) + list(no_date)
+    
+    limit = timezone.now() - timedelta(hours=24)
+    completed_tasks = Task.objects.filter(status='done', updated_at__gte=limit).order_by('-updated_at')
 
     return render(request, 'tasks.html', {
         'active_tasks': active_tasks,
-        'overdue_tasks': overdue_tasks,
         'completed_tasks': completed_tasks,
+        'today': today,
     })
 
 def finance(request):
-    # 1. Считаем общую выручку (все оплаченные проекты)
-    total_revenue = Project.objects.filter(payment_status='paid').aggregate(Sum('budget'))['budget__sum'] or 0
+    view_mode = request.GET.get('mode', 'daily')
+    month_val = request.GET.get('month', date.today().strftime('%Y-%m'))
+    try:
+        year, month = map(int, month_val.split('-'))
+    except ValueError:
+        today = date.today()
+        year, month = today.year, today.month
     
-    # 2. Считаем дебиторку (проекты в работе, которые еще не оплачены)
-    pending_payments = Project.objects.filter(
-        payment_status='pending'
-    ).exclude(status='done').aggregate(Sum('budget'))['budget__sum'] or 0
+    total_revenue = Project.objects.filter(payment_status='paid').aggregate(Sum('budget'))['budget__sum'] or 0
+    pending_payments = Project.objects.filter(payment_status='pending').aggregate(Sum('budget'))['budget__sum'] or 0
+    not_paid_payments = Project.objects.filter(payment_status='not_paid').aggregate(Sum('budget'))['budget__sum'] or 0
+    
+    projects_by_status = {
+        'paid': list(Project.objects.filter(payment_status='paid').values_list('title', flat=True)),
+        'pending': list(Project.objects.filter(payment_status='pending').values_list('title', flat=True)),
+        'not_paid': list(Project.objects.filter(payment_status='not_paid').values_list('title', flat=True)),
+    }
+    
+    if view_mode == 'monthly':
+        labels = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек']
+        revenue_data = [float(Project.objects.filter(payment_date__year=year, payment_date__month=m, payment_status='paid').aggregate(Sum('budget'))['budget__sum'] or 0) for m in range(1, 13)]
+        forecast_data = [float(Project.objects.filter(payment_date__year=year, payment_date__month=m, payment_status='pending').aggregate(Sum('budget'))['budget__sum'] or 0) for m in range(1, 13)]
+    else:
+        last_day = calendar.monthrange(year, month)[1]
+        labels = [str(d) for d in range(1, last_day + 1)]
+        qs_month = Project.objects.filter(payment_date__month=month, payment_date__year=year)
+        revenue_data = [float(qs_month.filter(payment_date__day=d, payment_status='paid').aggregate(Sum('budget'))['budget__sum'] or 0) for d in range(1, last_day + 1)]
+        forecast_data = [float(qs_month.filter(payment_date__day=d, payment_status='pending').aggregate(Sum('budget'))['budget__sum'] or 0) for d in range(1, last_day + 1)]
 
-    # 3. Получаем список последних транзакций (оплаченных проектов)
-    recent_payments = Project.objects.filter(payment_status='paid').select_related('client').order_by('-id')
+    projects_list = Project.objects.select_related('client').all().order_by('payment_status', '-budget')
+    top_clients = Client.objects.annotate(total_spent=Sum('projects__budget', filter=Q(projects__payment_status='paid'))).order_by('-total_spent')[:5]
 
     return render(request, 'finance.html', {
+        'view_mode': view_mode,
         'total_revenue': total_revenue,
         'pending_payments': pending_payments,
-        'recent_payments': recent_payments,
+        'not_paid_payments': not_paid_payments,
+        'projects_list': projects_list,
+        'top_clients': top_clients,
+        'paid_count': len(projects_by_status['paid']),
+        'pending_count': len(projects_by_status['pending']),
+        'not_paid_count': len(projects_by_status['not_paid']),
+        'projects_by_status': json.dumps(projects_by_status),
+        'dates': json.dumps(labels),
+        'revenue': json.dumps(revenue_data),
+        'forecast': json.dumps(forecast_data),
     })
 
-def calculator(request):
-    return render(request, 'calculator.html')
-
-def settings(request):
-    return render(request, 'settings.html')
-
-@csrf_exempt
-def update_status(request):
-    if request.method != 'POST':
-        return JsonResponse({'success': False, 'error': 'Invalid request'})
-
-    data = json.loads(request.body)
-    project_id = data.get('project_id')
-    new_status = data.get('status')
-    order_list = data.get('order_list', [])  # ожидаем список: [{id: "3", order: 1}, ...]
-
-    if not project_id or new_status is None:
-        return JsonResponse({'success': False, 'error': 'Missing fields'})
-
-    with transaction.atomic():
-        # Обновляем статус перемещённого проекта
-        project = get_object_or_404(Project, id=project_id)
-        project.status = new_status
-        project.save(update_fields=['status'])
-
-        # Обновляем порядок у всех карточек, присланных для колонки
-        for item in order_list:
-            try:
-                pid = int(item.get('id'))
-                pos = int(item.get('order'))
-            except Exception:
-                continue
-            try:
-                p = Project.objects.get(id=pid)
-            except Project.DoesNotExist:
-                continue
-            p.order = pos
-            p.status = new_status  # на всякий случай, чтобы статус совпадал
-            p.save(update_fields=['order', 'status'])
-
-    return JsonResponse({'success': True})
-
-def project_detail(request, project_id):
-    """Страница конкретного проекта с его задачами"""
-    project = get_object_or_404(Project, id=project_id)
-    
-    # Получаем задачи через related_name='tasks'
-    tasks = project.tasks.all()
-
-    return render(request, 'project_detail.html', {
-        'project': project,
-        'tasks_planned': tasks.filter(status='planned'),
-        'tasks_inwork': tasks.filter(status='inwork'),
-        'tasks_done': tasks.filter(status='done'),
-    })
+# --- AJAX ОПЕРАЦИИ (ПРОЕКТЫ) ---
 
 def add_project_ajax(request):
     if request.method == 'POST':
         title = request.POST.get('title')
         status = request.POST.get('status', 'planned')
-        # Приводим к числу, если есть данные
-        budget = request.POST.get('cost')
-        budget = int(budget) if budget and budget.isdigit() else 0
         
+        # Решаем проблему ценника: пробуем взять 'budget', если пусто — 'cost'
+        budget_raw = request.POST.get('budget') or request.POST.get('cost') or '0'
+        
+        # Очищаем строку от мусора, если он есть (пробелы, запятые)
+        try:
+            if isinstance(budget_raw, str):
+                budget_raw = budget_raw.replace(',', '.').replace(' ', '')
+            budget = float(budget_raw) if budget_raw else 0
+        except (ValueError, TypeError):
+            budget = 0
+            
         deadline_raw = request.POST.get('deadline')
         client_name = request.POST.get('client')
 
@@ -136,7 +127,7 @@ def add_project_ajax(request):
         if client_name:
             client, _ = Client.objects.get_or_create(name=client_name)
 
-        # Создаем проект ОДИН РАЗ
+        # Создаем проект
         project = Project.objects.create(
             title=title,
             status=status,
@@ -145,122 +136,126 @@ def add_project_ajax(request):
             client=client
         )
 
-        # Возвращаем JSON
+        # Возвращаем JSON строго в старом формате
         return JsonResponse({
             'success': True,
             'id': project.id,
             'title': project.title,
             'status': project.status,
-            'cost': project.budget,
+            'cost': project.budget, # Возвращаем напрямую из модели
             'client': project.client.name if project.client else "Нет клиента",
-            'deadline': str(project.end_date) if project.end_date else "—"
+            'deadline': str(project.end_date) if project.end_date else "—" # Строгий старый формат
         })
     
     return JsonResponse({'success': False, 'error': 'Method not allowed'})
-    
+
+def project_detail(request, project_id):
+    project = get_object_or_404(Project, id=project_id)
+    tasks = project.tasks.all().order_by('order')
+    return render(request, 'project_detail.html', {
+        'project': project,
+        'today': date.today(),
+        'tasks_planned': tasks.filter(status='planned'),
+        'tasks_inwork': tasks.filter(status='inwork'),
+        'tasks_done': tasks.filter(status='done'),
+    })
+
+@csrf_exempt
+def update_status(request):
+    if request.method != 'POST': return JsonResponse({'success': False})
+    data = json.loads(request.body)
+    with transaction.atomic():
+        project = get_object_or_404(Project, id=data.get('project_id'))
+        project.status = data.get('status')
+        project.save(update_fields=['status'])
+        for item in data.get('order_list', []):
+            Project.objects.filter(id=item.get('id')).update(order=item.get('order'), status=data.get('status'))
+    return JsonResponse({'success': True})
+
 @require_POST
 def delete_project(request, pk):
-    # Исправленная строка:
-    project = get_object_or_404(Project, pk=pk) 
-    project.delete()
+    get_object_or_404(Project, pk=pk).delete()
     return JsonResponse({'status': 'ok'})
 
 @require_POST
-def update_notes(request, project_id):
-    import json
+def update_project_field(request, project_id):
     data = json.loads(request.body)
+    field = data.get('field')
+    value = data.get('value')
+    project = get_object_or_404(Project, id=project_id)
+    if field in ['title', 'description', 'budget', 'end_date']:
+        if field == 'budget':
+            value = float(value.replace(' ', '')) if value else 0
+        setattr(project, field, value)
+        project.save()
+        return JsonResponse({'status': 'success'})
+    return JsonResponse({'status': 'error'}, status=400)
+
+@require_POST
+def update_payment(request, project_id):
+    data = json.loads(request.body)
+    status = data.get('payment_status')
     project = Project.objects.get(id=project_id)
-    project.description = data.get('description')
+    project.payment_status = status
+    project.payment_date = date.today() if status == 'paid' else None
     project.save()
-    return JsonResponse({'status': 'ok'})
+    return JsonResponse({'status': 'success'})
+
+# --- ЗАДАЧИ И КЛИЕНТЫ ---
 
 @csrf_exempt
 @require_POST
 def add_task(request, project_id):
-    try:
-        # 1. Парсим JSON
-        data = json.loads(request.body)
-        
-        # 2. Ищем проект
-        project = get_object_or_404(Project, id=project_id)
-        
-        # 3. Создаем задачу
-        task = Task.objects.create(
-            project=project,
-            title=data.get('title'),
-            status=data.get('status', 'planned'),
-        )
-        
-        # 4. Успешный ответ
-        return JsonResponse({'id': task.id, 'status': task.status})
-        
-    except json.JSONDecodeError:
-        return JsonResponse({'error': 'Invalid JSON body'}, status=400)
-    except Exception as e:
-        # Логируем ошибку, чтобы увидеть её в терминале
-        print(f"DEBUG ERROR: {e}")
-        return JsonResponse({'error': str(e)}, status=400)
+    data = json.loads(request.body)
+    project = get_object_or_404(Project, id=project_id)
+    task = Task.objects.create(
+        project=project,
+        title=data.get('title'),
+        status=data.get('status', 'planned'),
+        due_date=data.get('due_date') if data.get('due_date') else None
+    )
+    return JsonResponse({'id': task.id, 'status': task.status})
 
-@require_POST
-def update_payment(request, project_id):
-    try:
-        data = json.loads(request.body)
-        new_status = data.get('payment_status')
-        
-        project = Project.objects.get(id=project_id)
-        project.payment_status = new_status
-        project.save()
-        
-        return JsonResponse({'status': 'success'})
-    except Project.DoesNotExist:
-        return JsonResponse({'status': 'error', 'message': 'Project not found'}, status=404)
-    except Exception as e:
-        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
-    
-@require_POST
-def update_project_field(request, project_id):
-    try:
-        data = json.loads(request.body)
-        field = data.get('field')
-        value = data.get('value')
-        
-        project = get_object_or_404(Project, id=project_id)
-        
-        # Безопасная проверка: разрешаем менять только определенные поля
-        allowed_fields = ['title', 'description', 'budget', 'end_date']
-        if field in allowed_fields:
-            if field == 'budget':
-                value = float(value.replace(' ', '')) if value else 0
-            
-            setattr(project, field, value)
-            project.save()
-            return JsonResponse({'status': 'success'})
-            
-        return JsonResponse({'status': 'error', 'message': 'Invalid field'}, status=400)
-    except Exception as e:
-        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
-    
+@csrf_exempt
 @require_POST
 def update_task_status(request):
     data = json.loads(request.body)
-    task_id = data.get('id') # БЫЛО task_id, стало id, как в JS
-    new_status = data.get('status')
+    task_id = data.get('project_id') or data.get('id')
+    with transaction.atomic():
+        Task.objects.filter(id=task_id).update(status=data.get('status'))
+        for item in data.get('order_list', []):
+            Task.objects.filter(id=item.get('id')).update(order=item.get('order'), status=data.get('status'))
+    return JsonResponse({'success': True})
 
-    if not task_id:
-        return JsonResponse({'success': False, 'error': 'No ID provided'}, status=400)
-
+@require_POST
+def edit_task(request, task_id):
+    data = json.loads(request.body)
     task = get_object_or_404(Task, id=task_id)
-    task.status = new_status
+    task.title = data.get('title')
+    task.due_date = data.get('due_date') if data.get('due_date') else None
     task.save()
-    
     return JsonResponse({'success': True})
 
 def delete_task(request, pk):
-    if request.method == 'POST':
-        try:
-            task = Task.objects.get(pk=pk)
-            task.delete()
-            return JsonResponse({'success': True})
-        except Task.DoesNotExist:
-            return JsonResponse({'success': False, 'error': 'Задача не найдена'}, status=404)
-    return JsonResponse({'success': False, 'error': 'Метод не разрешен'}, status=405)
+    Task.objects.filter(pk=pk).delete()
+    return JsonResponse({'success': True})
+
+@require_POST
+def update_client_field(request, client_id):
+    data = json.loads(request.body)
+    client = get_object_or_404(Client, id=client_id)
+    if data.get('field') in ['contact_person', 'phone', 'email', 'telegram']:
+        setattr(client, data.get('field'), data.get('value'))
+        client.save()
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False}, status=400)
+
+@require_POST
+def toggle_client_vip(request, client_id):
+    client = get_object_or_404(Client, id=client_id)
+    client.is_vip = not client.is_vip
+    client.save()
+    return JsonResponse({'success': True, 'is_vip': client.is_vip})
+
+def calculator(request): return render(request, 'calculator.html')
+def settings(request): return render(request, 'settings.html')

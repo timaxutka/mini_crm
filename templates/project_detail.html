@@ -15,7 +15,7 @@
                 <p class="deadline" style="margin-bottom: 12px;">Бюджет и Оплата</p>
                 <div style="display: flex; align-items: baseline; gap: 10px; margin-bottom: 15px;">
                     <span contenteditable="true" onblur="saveField('budget', this.innerText)" 
-                          style="font-size: 24px; font-weight: 800; color: #fff; outline: none; border-bottom: 1px dashed rgba(255,255,255,0.2);">
+                          style="font-size: 24px; font-weight: 800; color: var(--text-primary); outline: none; border-bottom: 1px dashed rgba(255,255,255,0.2);">
                         {{ project.budget|default:"0" }}
                     </span>
                     <span style="color: #555; font-weight: 600; font-size: 14px;">RUB</span>
@@ -28,12 +28,49 @@
             </div>
 
             <div class="project-card">
-                <p class="deadline">Клиент</p>
-                <p style="color: #fff; font-weight: 600; margin: 5px 0 15px 0;">{{ project.client.name|default:"—" }}</p>
-                <p class="deadline">Дедлайн</p>
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <p class="deadline">Клиент</p>
+                    <span id="vipToggle" 
+                        onclick="toggleVip({{ project.client.id }})" 
+                        style="cursor: pointer; font-size: 20px; color: {% if project.client.is_vip %}#FFD700{% else %}#333{% endif %}; transition: 0.3s;">
+                        ★
+                    </span>
+                </div>
+                
+                <p style="color: var(--text-primary); font-weight: 600; margin: 5px 0 15px 0; font-size: 18px;">
+                    {{ project.client.name|default:"—" }}
+                </p>
+
+                <div style="display: grid; gap: 10px; font-size: 13px;">
+                    <div>
+                        <label style="color: #555; display: block; font-size: 11px; text-transform: uppercase;">Контактное лицо</label>
+                        <span contenteditable="true" onblur="saveClientField({{ project.client.id }}, 'contact_person', this.innerText)" 
+                            style="color: var(--text-primary); outline: none; border-bottom: 1px dashed #444;">
+                            {{ project.client.contact_person|default:"Добавить имя" }}
+                        </span>
+                    </div>
+
+                    <div>
+                        <label style="color: #555; display: block; font-size: 11px; text-transform: uppercase;">Телефон</label>
+                        <span contenteditable="true" onblur="saveClientField({{ project.client.id }}, 'phone', this.innerText)" 
+                            style="color: var(--text-primary); outline: none; border-bottom: 1px dashed #444;">
+                            {{ project.client.phone|default:"Добавить телефон" }}
+                        </span>
+                    </div>
+
+                    <div>
+                        <label style="color: #555; display: block; font-size: 11px; text-transform: uppercase;">Email</label>
+                        <span contenteditable="true" onblur="saveClientField({{ project.client.id }}, 'email', this.innerText)" 
+                            style="color: var(--text-primary); outline: none; border-bottom: 1px dashed #444;">
+                            {{ project.client.email|default:"Добавить email" }}
+                        </span>
+                    </div>
+                </div>
+
+                <p class="deadline" style="margin-top: 20px;">Дедлайн проекта</p>
                 <input type="date" value="{{ project.end_date|date:'Y-m-d' }}" 
-                       onchange="saveField('end_date', this.value)"
-                       style="background: transparent; border: none; color: #fff; font-size: 16px; font-weight: 600; cursor: pointer; width: 100%; outline: none;">
+                    onchange="saveField('end_date', this.value)"
+                    style="background: transparent; border: none; color: var(--text-primary); font-size: 16px; font-weight: 600; cursor: pointer; width: 100%; outline: none;">
             </div>
         </div>
 
@@ -48,64 +85,70 @@
 
     <h2 style="font-size: 14px; font-weight: 700; color: #555; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px;">Задачи проекта</h2>
     
-    <div class="kanban-board" data-model="Task" data-update-url="{% url 'update_task_status' %}">
-        <div class="kanban-column" data-status="planned">
-            <div class="kanban-column-header">
-                <h2>К выполнению</h2>
-                <button onclick="openTaskModal('planned')" class="open-modal-btn">+</button>
-            </div>
-            <div class="kanban-cards">
-                {% for task in tasks_planned %}
-                    <div class="project-card" 
-                        data-id="{{ task.id }}" 
-                        data-model="Task" 
-                        data-delete-url="{% url 'delete_task' task.id %}" 
-                        draggable="true" 
-                        style="padding: 16px; cursor: grab;">
-                        <p class="title" style="font-size: 14px; margin-bottom: 5px;">{{ task.title }}</p>
-                    </div>
-                {% endfor %}
-            </div>
+<div class="kanban-board" data-model="Task" data-update-url="{% url 'update_task_status' %}">
+    
+    <div class="kanban-column" data-status="planned">
+        <div class="kanban-column-header">
+            <h2>К выполнению</h2>
+            <button onclick="openTaskModal('planned')" class="open-modal-btn">+</button>
         </div>
-
-        <div class="kanban-column" data-status="inwork">
-            <div class="kanban-column-header">
-                <h2>В работе</h2>
-                <button onclick="openTaskModal('inwork')" class="open-modal-btn">+</button>
-            </div>
-            <div class="kanban-cards">
-                {% for task in tasks_inwork %}
-                    <div class="project-card" 
-                        data-id="{{ task.id }}" 
-                        data-model="Task" 
-                        data-delete-url="{% url 'delete_task' task.id %}" 
-                        draggable="true" 
-                        style="padding: 16px; cursor: grab;">
-                        <p class="title" style="font-size: 14px; margin-bottom: 5px;">{{ task.title }}</p>
-                    </div>
-                {% endfor %}
-            </div>
-        </div>
-
-        <div class="kanban-column" data-status="done">
-            <div class="kanban-column-header">
-                <h2>Выполнено</h2>
-                <button onclick="openTaskModal('done')" class="open-modal-btn">+</button>
-            </div>
-            <div class="kanban-cards">
-                {% for task in tasks_done %}
-                    <div class="project-card" 
-                        data-id="{{ task.id }}" 
-                        data-model="Task" 
-                        data-delete-url="{% url 'delete_task' task.id %}" 
-                        draggable="true" 
-                        style="padding: 16px; cursor: grab;">
-                        <p class="title" style="font-size: 14px; margin-bottom: 5px;">{{ task.title }}</p>
-                    </div>
-                {% endfor %}
-            </div>
+        <div class="kanban-cards">
+            {% for task in tasks_planned %}
+                <div class="project-card" data-id="{{ task.id }}" data-title="{{ task.title }}" data-date="{{ task.due_date|date:'Y-m-d' }}" data-model="Task" data-delete-url="{% url 'delete_task' task.id %}" draggable="true" style="padding: 16px; cursor: grab;">
+                    <p class="title" style="font-size: 14px; margin-bottom: 8px;">{{ task.title }}</p>
+                    
+                    {% if task.due_date %}
+                        <div style="font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 5px; color: {% if task.due_date < today %}#ff4b4b{% else %}#888{% endif %};">
+                            <span>Дедлайн: {{ task.due_date|date:"d.m.Y" }}</span>
+                            {% if task.due_date < today %}<span style="font-size: 10px; background: rgba(255,75,75,0.1); padding: 2px 4px; border-radius: 4px;">🔥 ПРОСРОЧЕНО</span>{% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
         </div>
     </div>
+
+    <div class="kanban-column" data-status="inwork">
+        <div class="kanban-column-header">
+            <h2>В работе</h2>
+            <button onclick="openTaskModal('inwork')" class="open-modal-btn">+</button>
+        </div>
+        <div class="kanban-cards">
+            {% for task in tasks_inwork %}
+                <div class="project-card" data-id="{{ task.id }}" data-title="{{ task.title }}" data-date="{{ task.due_date|date:'Y-m-d' }}" data-model="Task" data-delete-url="{% url 'delete_task' task.id %}" draggable="true" style="padding: 16px; cursor: grab;">
+                    <p class="title" style="font-size: 14px; margin-bottom: 8px;">{{ task.title }}</p>
+                    
+                    {% if task.due_date %}
+                        <div style="font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 5px; color: {% if task.due_date < today %}#ff4b4b{% else %}#888{% endif %};">
+                            <span>Дедлайн: {{ task.due_date|date:"d.m.Y" }}</span>
+                            {% if task.due_date < today %}<span style="font-size: 10px; background: rgba(255,75,75,0.1); padding: 2px 4px; border-radius: 4px;">🔥 СРОЧНО</span>{% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="kanban-column" data-status="done">
+        <div class="kanban-column-header">
+            <h2>Выполнено</h2>
+            <button onclick="openTaskModal('done')" class="open-modal-btn">+</button>
+        </div>
+        <div class="kanban-cards">
+            {% for task in tasks_done %}
+                <div class="project-card" data-id="{{ task.id }}" data-title="{{ task.title }}" data-date="{{ task.due_date|date:'Y-m-d' }}" data-model="Task" data-delete-url="{% url 'delete_task' task.id %}" draggable="true" style="padding: 16px; cursor: grab; opacity: 0.6;">
+                    <p class="title" style="font-size: 14px; margin-bottom: 8px; text-decoration: line-through;">{{ task.title }}</p>
+                    
+                    {% if task.due_date %}
+                        <div style="font-size: 11px; color: #555; display: flex; align-items: center; gap: 5px;">
+                            <span>Дедлайн: {{ task.due_date|date:"d.m.Y" }}</span>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
 
 <div id="taskModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); justify-content: center; align-items: center; z-index: 1000;">
     <div class="modal-content" style="background: #1a1a1a; padding: 24px; border-radius: 12px; width: 400px; color: white; border: 1px solid #333;">
@@ -114,12 +157,14 @@
             <span class="close-modal" onclick="closeTaskModal()" style="cursor: pointer;">&times;</span>
         </div>
         <form id="addTaskForm">
-            <input type="hidden" id="taskStatus" name="status">
+            <input type="hidden" id="taskId" name="task_id"> <input type="hidden" id="taskStatus" name="status">
             <div class="form-group" style="margin-bottom: 15px;">
                 <label style="display: block; margin-bottom: 5px; color: #aaa;">Название задачи</label>
-                <input type="text" name="title" required style="width: 100%; padding: 10px; background: #2a2a2a; border: 1px solid #444; border-radius: 6px; color: white; box-sizing: border-box;">
+                <input type="text" name="title" required style="width: 100%; margin-bottom: 10px; padding: 10px; background: #2a2a2a; border: 1px solid #444; border-radius: 6px; color: white; box-sizing: border-box;">
+                <label style="display: block; margin-bottom: 5px; color: #aaa;">Дедлайн</label>
+    <input type="date" id="taskDueDate" name="due_date" style="width: 100%; padding: 10px; background: #2a2a2a; border: 1px solid #444; border-radius: 6px; color: white; box-sizing: border-box;">
             </div>
-            <button type="submit" class="submit-project-btn" style="width: 100%; padding: 12px; background: white; color: black; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">Создать задачу</button>
+            <button type="submit" id="taskSubmitBtn" class="submit-project-btn" style="width: 100%; padding: 12px; background: white; color: black; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">Создать задачу</button>
         </form>
     </div>
 </div>
@@ -145,32 +190,59 @@
 <script src="{% static 'kanban.js' %}"></script>
 
 <script>
-    // Ждем, пока загрузится КАНБАН
-    window.addEventListener('load', () => {
-        if (typeof window.initAllCards === 'function') {
-            console.log("Канбан найден, запускаю привязку задач...");
-            window.initAllCards();
-        } else {
-            console.warn("Канбан еще не загрузился, ждем...");
-        }
-    });
-</script>
-
-<script>
     const projectId = "{{ project.id }}";
 
-    // 2. ОБРАБОТЧИК ФОРМЫ (Этого блока у вас не хватало)
+    // 1. Инициализация кликов на существующие карточки (чтобы открывалось редактирование)
+    function attachEditEvent(card) {
+        card.addEventListener('click', function(e) {
+            // Если мы кликнули на саму карточку (а не на кнопку удаления или зону перетаскивания)
+            if (this.dataset.model === 'Task') {
+                const taskId = this.dataset.id;
+                const title = this.querySelector('.title').innerText;
+                const status = this.closest('.kanban-column').dataset.status;
+                
+                // Пробуем найти дату из data-атрибута (добавь его в HTML, как я писал выше)
+                // Или вытащим текст из блока дедлайна, если атрибута нет
+                const dateText = this.dataset.date || ""; 
+
+                openTaskModal(status, taskId, title, dateText);
+                
+                // Останавливаем всплытие, чтобы не сработали другие обработчики из kanban.js
+                e.stopPropagation();
+            }
+        });
+    }
+
+    // Применяем ко всем карточкам при загрузке
+    window.addEventListener('load', () => {
+        document.querySelectorAll('.project-card[data-model="Task"]').forEach(attachEditEvent);
+        
+        if (typeof window.initAllCards === 'function') {
+            window.initAllCards();
+        }
+    });
+
+    // 2. УНИВЕРСАЛЬНЫЙ ОБРАБОТЧИК ФОРМЫ (Создание + Редактирование)
     document.getElementById('addTaskForm').addEventListener('submit', function(e) {
         e.preventDefault(); 
         
+        const taskId = document.getElementById('taskId') ? document.getElementById('taskId').value : null;
         const status = document.getElementById('taskStatus').value;
         const title = this.querySelector('input[name="title"]').value;
+        const dueDate = document.getElementById('taskDueDate').value;
+
         const formData = {
             title: title,
-            status: status
+            status: status,
+            due_date: dueDate
         };
+
+        // Если taskId есть — идем на edit, если нет — на add
+        const url = taskId 
+            ? `/projects/task/${taskId}/edit/` 
+            : `/projects/${projectId}/add_task/`;
         
-        fetch(`/projects/${projectId}/add_task/`, {
+        fetch(url, {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json', 
@@ -180,43 +252,55 @@
         })
         .then(res => res.json())
         .then(data => {
-            if (data.id) {
-                // Создаем карточку задачи
-                const newTask = document.createElement('div');
-                newTask.className = 'project-card';
-                newTask.dataset.id = data.id;
-                newTask.dataset.model = 'Task';
-                newTask.draggable = true;
-                newTask.style.padding = '16px';
-                newTask.style.cursor = 'grab';
-                
-                // Если статус "done", добавляем стили зачеркивания
-                const titleStyle = status === 'done' ? 'text-decoration: line-through; opacity: 0.5;' : '';
-                if (status === 'done') newTask.style.opacity = '0.5';
-
-                newTask.innerHTML = `<p class="title" style="font-size: 14px; margin-bottom: 5px; ${titleStyle}">${title}</p>`;
-                
-                // Инициализируем события перетаскивания (функция из kanban.js)
-                if (typeof initCardEvents === 'function') {
-                    initCardEvents(newTask);
-                }
-
-                // Добавляем в колонку
-                const column = document.querySelector(`.kanban-column[data-status="${status}"] .kanban-cards`);
-                column.appendChild(newTask);
-
-                // Закрываем и сбрасываем
-                closeTaskModal();
-                this.reset();
+            if (data.id || data.success) {
+                // Чтобы не возиться с обновлением DOM вручную при сложном редактировании, 
+                // проще перезагрузить, так как kanban.js мы не меняем.
+                location.reload(); 
             }
         })
         .catch(err => {
             console.error('Ошибка:', err);
-            alert('Не удалось создать задачу.');
+            alert('Не удалось сохранить задачу.');
         });
     });
 
-    // 3. Остальные функции
+    // 3. ОТКРЫТИЕ МОДАЛКИ
+    window.openTaskModal = (status, taskId = null, title = '', date = '') => {
+        const modal = document.getElementById('taskModal');
+        const submitBtn = modal.querySelector('.submit-project-btn');
+        const titleInput = modal.querySelector('input[name="title"]');
+        const dateInput = document.getElementById('taskDueDate');
+        const taskIdInput = document.getElementById('taskId'); // Скрытое поле
+        const modalHeader = modal.querySelector('h2');
+
+        // Сброс формы
+        document.getElementById('taskStatus').value = status;
+        
+        if (taskId) {
+            // Режим редактирования
+            if (taskIdInput) taskIdInput.value = taskId;
+            titleInput.value = title;
+            dateInput.value = date;
+            modalHeader.innerText = "Редактировать задачу";
+            submitBtn.innerText = "Сохранить";
+        } else {
+            // Режим создания
+            if (taskIdInput) taskIdInput.value = "";
+            titleInput.value = "";
+            dateInput.value = "";
+            modalHeader.innerText = "Новая задача";
+            submitBtn.innerText = "Создать задачу";
+        }
+
+        modal.style.display = 'flex';
+    };
+    
+    window.closeTaskModal = () => {
+        document.getElementById('taskModal').style.display = 'none';
+        document.getElementById('addTaskForm').reset();
+    };
+
+    // Служебные функции
     function saveField(field, value) {
         fetch(`/projects/${projectId}/update_field/`, {
             method: 'POST',
@@ -233,13 +317,36 @@
         }).then(() => document.getElementById('paymentStatusSelect').className = 'payment-status-dropdown ' + newStatus);
     }
 
-    window.openTaskModal = (status) => {
-        document.getElementById('taskStatus').value = status;
-        document.getElementById('taskModal').style.display = 'flex';
-    };
+    // Сохранение текстовых полей клиента
+function saveClientField(clientId, field, value) {
+    if (!clientId) return;
+    fetch(`/clients/${clientId}/update_field/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+        body: JSON.stringify({ field, value })
+    });
+}
+
+// Переключение VIP статуса
+function toggleVip(clientId) {
+    if (!clientId) return;
+    const star = document.getElementById('vipToggle');
     
-    window.closeTaskModal = () => {
-        document.getElementById('taskModal').style.display = 'none';
-    };
+    // Мгновенно меняем цвет для отклика (UI)
+    const isCurrentlyVip = star.style.color === 'rgb(255, 215, 0)'; // Gold
+    star.style.color = isCurrentlyVip ? '#333' : '#FFD700';
+
+    fetch(`/clients/${clientId}/toggle_vip/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (!data.success) {
+            // Если ошибка — возвращаем цвет назад
+            star.style.color = isCurrentlyVip ? '#FFD700' : '#333';
+        }
+    });
+}
 </script>
 {% endblock %}

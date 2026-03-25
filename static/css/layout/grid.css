@@ -88,3 +88,50 @@
     opacity: 0.5;
     transform: scale(0.95);
 }
+
+/* --- СВЕТЛАЯ ТЕМА ДЛЯ GRID/KANBAN (СТАРЫЕ СТИЛИ НЕ ТРОГАЕМ) --- */
+
+[data-theme="light"] .kanban-column {
+    background: #f9f9fb; /* Базовый светлый фон для всех колонок */
+    border-top-width: 4px; /* Делаем акцент чуть жирнее для видимости */
+}
+
+/* Индивидуальные фоны для колонок в светлой теме (пастельные тона) */
+[data-theme="light"] .kanban-column[data-status="planned"] { 
+    background: linear-gradient(180deg, rgba(142, 142, 147, 0.1) 0%, #fcfcfc 100%);
+    /* border-top-color: var(--col-planned); */
+}
+[data-theme="light"] .kanban-column[data-status="inwork"] { 
+    background: linear-gradient(180deg, rgba(255, 204, 0, 0.1) 0%, #fcfcfc 100%);
+    /* border-top-color: var(--col-inwork); */
+}
+[data-theme="light"] .kanban-column[data-status="done"] { 
+    background: linear-gradient(180deg, rgba(52, 199, 89, 0.1) 0%, #fcfcfc 100%);
+    /* border-top-color: var(--col-done); */
+}
+[data-theme="light"] .kanban-column[data-status="overdue"] { 
+    background: linear-gradient(180deg, rgba(255, 59, 48, 0.1) 0%, #fcfcfc 100%);
+    /* border-top-color: var(--col-overdue); */
+}
+[data-theme="light"] .kanban-column[data-status="paused"] { 
+    background: linear-gradient(180deg, rgba(88, 86, 214, 0.1) 0%, #fcfcfc 100%);
+    /* border-top-color: var(--col-paused); */
+}
+
+/* Заголовки колонок */
+[data-theme="light"] .kanban-column-header h2 {
+    color: var(--text-primary); /* Черный вместо серого для четкости */
+    font-weight: 700;
+}
+
+/* Плейсхолдер при перетаскивании */
+[data-theme="light"] .kanban-placeholder {
+    background: rgba(0, 0, 0, 0.03);
+    border: 2px dashed var(--border-color);
+}
+
+/* Эффект при перетаскивании карточки */
+[data-theme="light"] .project-card.dragging {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    opacity: 0.7;
+}

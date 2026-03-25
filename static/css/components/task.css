@@ -1,0 +1,109 @@
+/* Стиль для кастомного bullet-чекбокса */
+.task-bullet {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--text-secondary);
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+}
+
+.task-bullet:hover {
+    border-color: var(--col-done);
+    background: rgba(52, 199, 89, 0.1);
+}
+
+.overdue-date { color: var(--col-overdue) !important; font-weight: 700; }
+
+/* Принудительный белый цвет для текста задач */
+.task-row {
+    color: var(--text-primary); /* Убедись, что переменная --text-primary в :root определена как белый */
+}
+
+
+/* Чтобы "Без даты" было чуть серее, но тоже видно */
+.task-date {
+    color: #808080 !important;
+    display: flex; 
+    align-items: center; 
+    gap: 15px; 
+    padding: 16px; 
+    border-bottom: 1px solid rgba(255,255,255,0.05); 
+    transition: 0.3s;
+}
+
+/* Стили для уровней важности */
+.row-overdue {
+    background-color: rgba(255, 59, 48, 0.15) !important; /* var(--col-overdue) */
+    border-left: 4px solid var(--col-overdue);
+}
+
+.row-warning {
+    background-color: rgba(255, 204, 0, 0.1) !important; /* var(--col-inwork) */
+    border-left: 4px solid var(--col-inwork);
+}
+
+/* Просрочено */
+.overdue-text {
+    color: var(--col-overdue) !important;
+    font-weight: 700;
+}
+
+/* 1-2 дня до дедлайна */
+.warning-text {
+    color: var(--col-inwork) !important; /* Твой желтый из переменной */
+    font-weight: 600;
+}
+
+/* --- СВЕТЛАЯ ТЕМА ДЛЯ ЗАДАЧ (СТАРЫЕ СТИЛИ НЕ ТРОГАЕМ) --- */
+
+/* Контейнер задачи */
+[data-theme="light"] .task-date {
+    color: var(--text-secondary) !important;
+    border-bottom: 1px solid var(--border-color);
+}
+
+[data-theme="light"] .task-row {
+    color: var(--text-primary); /* Станет черным из переменных */
+}
+
+/* Кастомный чекбокс-буллит */
+[data-theme="light"] .task-bullet {
+    border-color: var(--border-color);
+    background: #ffffff;
+}
+
+[data-theme="light"] .task-bullet:hover {
+    border-color: var(--col-done);
+    background: rgba(52, 199, 89, 0.1);
+}
+
+/* ИНДИКАЦИЯ ВАЖНОСТИ (Пастельные тона для светлого фона) */
+
+/* Просрочено */
+[data-theme="light"] .row-overdue {
+    background-color: rgba(255, 59, 48, 0.08) !important; /* Мягкий розовый */
+    border-left: 4px solid var(--col-overdue);
+}
+
+[data-theme="light"] .overdue-text {
+    color: #c9302c !important; /* Темно-красный для контраста */
+}
+
+/* Предупреждение (1-2 дня) */
+[data-theme="light"] .row-warning {
+    background-color: rgba(255, 204, 0, 0.12) !important; /* Мягкий желтый */
+    border-left: 4px solid var(--col-inwork);
+}
+
+[data-theme="light"] .warning-text {
+    color: #8a6d00 !important; /* Грязновато-желтый (читабельный на белом) */
+}
+
+/* Дата без дедлайна */
+[data-theme="light"] .task-date-text {
+    color: var(--text-secondary) !important;
+}

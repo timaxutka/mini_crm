@@ -83,3 +83,58 @@
 .paid { color: #00FF6D; background: rgba(0, 255, 109, 0.1); }
 .not_paid { color: #FF4B4B; background: rgba(255, 75, 75, 0.1); }
 .pending { color: #FFB347; background: rgba(255, 179, 71, 0.1); }
+
+/* --- СВЕТЛАЯ ТЕМА ДЛЯ КАРТОЧЕК (СТАРЫЕ СТИЛИ НЕ ТРОГАЕМ) --- */
+
+[data-theme="light"] .project-card, 
+[data-theme="light"] .card {
+    background: #ffffff; /* Чисто белый для максимального контраста */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* Легкая тень */
+}
+
+[data-theme="light"] .project-card:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    border-color: #007aff; /* Синий акцент при наведении в стиле Apple */
+    transform: translateY(-4px);
+}
+
+/* Текст в карточках */
+[data-theme="light"] .project-card .title {
+    color: var(--text-primary);
+}
+
+[data-theme="light"] .project-card .deadline,
+[data-theme="light"] .project-card .client {
+    color: var(--text-secondary); /* Темно-серый */
+}
+
+[data-theme="light"] .project-card .cost {
+    color: #000000;
+}
+
+/* Бейджи оплаты - делаем цвета более насыщенными для белого фона */
+[data-theme="light"] .payment-status {
+    background: rgba(0, 0, 0, 0.03);
+}
+
+[data-theme="light"] .paid { 
+    color: #1a8a43; /* Темно-зеленый (читабельнее на белом) */
+    background: rgba(52, 199, 89, 0.15); 
+}
+
+[data-theme="light"] .not_paid { 
+    color: #c9302c; /* Насыщенный красный */
+    background: rgba(255, 59, 48, 0.15); 
+}
+
+[data-theme="light"] .pending { 
+    color: #9a6d00; /* Темно-оранжевый */
+    background: rgba(255, 204, 0, 0.2); 
+}
+
+/* Индикатор перетаскивания в светлой теме */
+[data-theme="light"] .project-card.dragging {
+    background: #f8f9fa;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    border: 1px solid #007aff;
+}

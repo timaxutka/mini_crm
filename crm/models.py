@@ -52,6 +52,7 @@ class Project(models.Model):
     start_date = models.DateField(null=True, blank=True, verbose_name="Дата начала")
     end_date = models.DateField(null=True, blank=True, verbose_name="Дата завершения")
     payment_status = models.CharField(max_length=20, choices=PAYMENT_CHOICES, default='not-paid', verbose_name="Оплата")
+    payment_date = models.DateField(null=True, blank=True, verbose_name="Дата оплаты")
 
     order = models.PositiveIntegerField(default=0, verbose_name="Позиция")
 
@@ -76,7 +77,7 @@ class Project(models.Model):
         return self.title
 
     def get_status_display(self):
-        return dict(self.STATUS_CHOICES).get(self.status, '—')
+        return dict(self.STATUS_CHOICES).get(self.status, '—') 
 
     def get_payment_status_display(self):
         return dict(self.PAYMENT_CHOICES).get(self.payment_status, '—')
@@ -95,8 +96,10 @@ class Task(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='tasks', verbose_name="Проект")
     title = models.CharField(max_length=255, verbose_name="Заголовок задачи")
     status = models.CharField(max_length=20, choices=TASK_STATUS_CHOICES, default='todo', verbose_name="Статус задачи")
-    created_at = models.DateTimeField(auto_now_add=True)
     due_date = models.DateField(null=True, blank=True, verbose_name="Срок исполнения")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    order = models.PositiveIntegerField(default=0, verbose_name="Позиция")
 
     def __str__(self):
         return f"{self.title} — {self.project.title}"
@@ -104,3 +107,4 @@ class Task(models.Model):
     class Meta:
         verbose_name = "Задача"
         verbose_name_plural = "Задачи"
+        ordering = ['order', 'id'] 

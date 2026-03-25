@@ -88,3 +88,55 @@
     flex-direction: column;
     align-items: center;
 }
+
+/* --- СВЕТЛАЯ ТЕМА ДЛЯ УДАЛЕНИЯ (СТАРЫЕ СТИЛИ НЕ ТРОГАЕМ) --- */
+
+/* Зона удаления (Drag-and-Drop) */
+[data-theme="light"] .delete-zone {
+    background: rgba(255, 59, 48, 0.08); /* Светло-красный пастельный */
+    border: 2px dashed rgba(255, 59, 48, 0.4);
+    color: #ff3b30; /* Насыщенный красный Apple */
+}
+
+[data-theme="light"] .delete-zone.drag-over {
+    background: #ff3b30;
+    color: #ffffff;
+    border-style: solid;
+    box-shadow: 0 10px 30px rgba(255, 59, 48, 0.3);
+}
+
+/* Модалка подтверждения удаления */
+[data-theme="light"] .confirm-modal {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+}
+
+[data-theme="light"] .confirm-content {
+    background: #ffffff;
+    color: #000000;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="light"] .confirm-content h2 {
+    color: #000000;
+}
+
+[data-theme="light"] .confirm-content p {
+    color: #636366; /* Темно-серый для описания */
+}
+
+/* Кнопки в модалке подтверждения */
+[data-theme="light"] .confirm-actions .btn-danger {
+    background: #ff3b30;
+    color: #ffffff;
+}
+
+[data-theme="light"] .confirm-actions .btn-secondary {
+    background: #e5e5ea;
+    color: #000000;
+}
+
+[data-theme="light"] .confirm-actions .btn-secondary:hover {
+    background: #d1d1d6;
+}

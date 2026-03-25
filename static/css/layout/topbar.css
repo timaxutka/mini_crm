@@ -96,3 +96,53 @@ h1 {
     color: white;
     margin-bottom: 12px; /* Было 12, добавил px */
 }
+
+
+/* --- СВЕТЛАЯ ТЕМА ДЛЯ TOPBAR (СТАРЫЕ СТИЛИ НЕ ТРОГАЕМ) --- */
+
+[data-theme="light"] .topbar {
+    background: rgba(255, 255, 255, 0.8); /* Белый полупрозрачный */
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border-color);
+}
+
+[data-theme="light"] .search-bar {
+    background: #f2f2f7; /* Светло-серый "остров" */
+}
+
+[data-theme="light"] .profile-bar {
+    background: #ffffff; /* Светло-серый "остров" */
+}
+
+[data-theme="light"] .search-bar input {
+    color: var(--text-primary);
+}
+
+/* Настраиваем плейсхолдер для поиска, чтобы его было видно */
+[data-theme="light"] .search-bar input::placeholder {
+    color: var(--text-secondary);
+}
+
+[data-theme="light"] .profile-actions {
+    border-left: 1px solid var(--border-color);
+}
+
+[data-theme="light"] .icon-btn {
+    filter: none; /* Убираем инверсию, если иконки изначально черные/темные */
+    opacity: 0.8;
+}
+
+[data-theme="light"] .icon-btn:hover {
+    opacity: 1;
+    filter: brightness(0); /* Делаем иконку чисто черной при наведении */
+}
+
+[data-theme="light"] h1 {
+    color: var(--text-primary);
+}
+
+/* Если иконка поиска — это img внутри search-bar */
+[data-theme="light"] .search-bar img {
+    filter: grayscale(1) brightness(0);
+    opacity: 0.5;
+}

@@ -8,7 +8,9 @@
 @import 'components/modal.css';
 @import 'components/delete.css';
 @import 'components/selectors.css';
-
+@import 'components/table.css';
+@import 'components/task.css';
+@import 'components/finance.css';
 
 body {
     display: flex;

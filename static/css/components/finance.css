@@ -1,0 +1,168 @@
+/* Финансы: Сетка для KPI */
+.finance-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.kpi-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.kpi-card h3 { font-size: 12px; color: var(--text-secondary); text-transform: uppercase; margin: 0; }
+.kpi-card p { font-size: 24px; font-weight: 700; margin: 0; color: var(--text-primary); }
+
+/* Финансы: Основная сетка графиков */
+.finance-main-grid {
+    display: grid;
+    grid-template-columns: 300px 1fr; /* Фиксируем диаграмму, график тянется */
+    gap: 24px;
+    margin-bottom: 24px;
+}
+
+/* Финансы: Таблицы */
+.finance-bottom-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 24px;
+}
+
+/* Переиспользование класса .card для всего */
+.finance-chart-container { height: 300px; }
+
+.finance-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: white;
+}
+
+.finance-table td {
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.finance-table small {
+    font-size: 11px;
+}
+
+/* Переопределяем поведение карточек только внутри страницы Финансы */
+.finance-page .card {
+    cursor: default !important; /* Убираем 'grab' */
+    transform: none !important; /* Убираем эффект подъема */
+}
+
+.finance-page .card:hover {
+    border-color: rgba(255, 255, 255, 0.05); /* Убираем подсвечивание рамки */
+    transform: none !important;
+}
+
+/* Стили для таблицы, чтобы она выглядела профессионально, а не "как список в канбане" */
+.finance-page .finance-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.finance-page .finance-table td {
+    padding: 16px 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+}
+
+/* Выравнивание внутри таблицы */
+.finance-page .finance-table .text-right { text-align: right; }
+.finance-page .finance-table .text-center { text-align: center; }
+
+.finance-page h3 {
+    color: var(--text-primary) !important; /* Принудительно белый текст для заголовков */
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+
+.finance-page td {
+    color: white !important;
+}
+
+.finance-page {
+    /* Используем переменные, если они есть, или задаем жестко */
+    --padding-card: 24px;
+    --radius-card: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px; /* Отступы между основными блоками (KPI, графики, таблицы) */
+}
+
+/* Скругления для всех карточек внутри */
+.finance-page .card {
+    border-radius: var(--radius-card) !important;
+    padding: var(--padding-card) !important;
+}
+
+/* Выравнивание заголовков внутри карточек */
+.finance-page .card h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 15px;
+    color: var(--text-primary);
+}
+
+/* Добавляем внутренние отступы для списков и таблиц */
+.finance-page .top-clients-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px; /* Отступы между элементами в списке клиентов */
+}
+
+.finance-page .finance-table {
+    margin-top: 10px;
+    width: 100%;
+}
+
+/* --- СВЕТЛАЯ ТЕМА ДЛЯ ФИНАНСОВ (СТАРЫЕ СТИЛИ НЕ ТРОГАЕМ) --- */
+
+[data-theme="light"] .kpi-card h3 {
+    color: var(--text-secondary); /* Темно-серый подзаголовок */
+}
+
+[data-theme="light"] .kpi-card p {
+    color: #000000; /* Глубокий черный для цифр KPI */
+}
+
+/* Снимаем жесткие белые цвета с таблиц */
+[data-theme="light"] .finance-page td,
+[data-theme="light"] .finance-table,
+[data-theme="light"] .finance-page .finance-table td {
+    color: var(--text-primary) !important;
+    border-bottom: 1px solid var(--border-color);
+}
+
+[data-theme="light"] .finance-table small {
+    color: var(--text-secondary);
+}
+
+/* Заголовки внутри карточек финансов */
+[data-theme="light"] .finance-page h3,
+[data-theme="light"] .finance-page .card h3 {
+    color: var(--text-primary) !important;
+    font-weight: 700;
+}
+
+/* Очистка ховеров для финансовых карточек в светлой теме */
+[data-theme="light"] .finance-page .card {
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .finance-page .card:hover {
+    border-color: var(--border-color) !important;
+}
+
+/* Если у тебя есть графики (Chart.js или аналоги), 
+   их фон обычно прозрачный, но сетку лучше подстроить под светлый фон */
+[data-theme="light"] .finance-chart-container {
+    background: #ffffff;
+    border-radius: var(--radius-card);
+}

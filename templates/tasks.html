@@ -1,57 +1,88 @@
 {% extends 'base.html' %}
-{% block content %}
-<div class="content">
-    <div class="topbar">
-        <h1>Мои задачи</h1>
-        <div style="flex-grow: 1;"></div>
-        <button class="add-project-btn">+ Новая задача</button>
-    </div>
+{% load static %}
 
-    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
-        
-        <div class="project-card" style="padding: 20px; border: 1px solid #191919;">
-            <h3 style="margin-bottom: 20px; color: #808080; font-size: 14px; text-transform: uppercase;">В работе</h3>
-            
-            {% for task in active_tasks %}
-            <div style="display: flex; align-items: flex-start; gap: 15px; padding: 15px; border-bottom: 1px solid #191919; transition: 0.3s;" onmouseover="this.style.backgroundColor='#161616'" onmouseout="this.style.backgroundColor='transparent'">
-                <input type="checkbox" style="margin-top: 5px; cursor: pointer;">
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/main.css' %}">
+<script src="{% static 'js/search.js' %}"></script>
+
+<style>
+    .task-row { display: flex; align-items: center; gap: 15px; padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.05); transition: 0.3s; }
+    .task-row:hover { background: rgba(255,255,255,0.02); }
+    
+    .task-bullet { 
+        width: 20px; height: 20px; border: 2px solid var(--text-secondary); 
+        border-radius: 50%; cursor: pointer; flex-shrink: 0;
+    }
+    .task-bullet:hover { border-color: var(--col-done); }
+
+    .overdue-text { color: #FF4B4B !important; font-weight: 600; }
+    .task-date { font-size: 12px; color: var(--text-secondary); }
+</style>
+
+
+<h1>Мои задачи</h1>
+<div class="search-bar" style="margin-bottom: 20px;">
+    <img src="{% static 'icons/search.svg' %}" alt="Поиск" class="icon" style="opacity: 0.5; width: 20px;">
+    <input type="text" id="taskSearch" placeholder="Найти задачу..." 
+           onkeyup="universalSearch('taskSearch', '.table-container', '.task-row')">
+</div>
+
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; align-items: start;">
+    <div class="table-container">
+        {% for task in active_tasks %}
+        {% with days_left=task.due_date|timeuntil:today %}
+            <div class="task-row {% if task.due_date < today %}row-overdue{% elif days_left and days_left|slice:':1'|add:'0' <= 2 and task.due_date >= today %}row-warning{% endif %}" 
+                id="task-{{ task.id }}">
+                
+                <div class="task-bullet" onclick="completeTask({{ task.id }})"></div>
                 
                 <div style="flex-grow: 1;">
-                    <div style="font-weight: 500; margin-bottom: 4px;">{{ task.title }}</div>
-                    <div style="font-size: 12px; color: #808080;">
-                        <span style="color: #7A5AF8;">{{ task.project.title }}</span> 
-                        • {{ task.project.client.name|default:"Без клиента" }}
+                    <div style="font-weight: 500;">{{ task.title }}</div>
+                    <div style="font-size: 12px; color: var(--text-secondary);">
+                        {{ task.project.title }} • {{ task.project.client.name }}
                     </div>
                 </div>
-
-                <div style="text-align: right;">
-                    <div style="font-size: 12px; font-weight: 600; {% if task in overdue_tasks %}color: #F04438;{% else %}color: #5FBE6F;{% endif %}">
-                        {{ task.due_date|date:"d M"|default:"Без даты" }}
-                    </div>
-                    <div style="font-size: 10px; color: #555;">Дедлайн</div>
+                
+                <div class="task-date">
+                    {{ task.due_date|date:"d M"|default:"Без даты" }}
                 </div>
             </div>
+        {% endwith %}
+        {% empty %}
+            <div style="padding: 40px; text-align: center; color: var(--text-secondary);">Задач нет, можно отдыхать! 🍹</div>
+        {% endfor %}
+    </div>
+
+    <div class="project-card" style="padding: 20px; background: var(--bg-card); border-radius: 12px; color: #ffffff;">
+        <h3 style="color: var(--text-primary); margin-bottom: 15px; font-size: 16px;">История завершенных</h3>
+        
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+            {% for task in completed_tasks %}
+                <div style="font-size: 13px; color: #808080; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    <span style="text-decoration: line-through;">{{ task.title }}</span>
+                    <span style="opacity: 0.6; font-size: 11px;"> • {{ task.project.title }}</span>
+                </div>
             {% empty %}
-            <div style="padding: 40px; text-align: center; color: #444;">Все задачи выполнены! Отдыхай 🍹</div>
+                <div style="font-size: 12px; color: #555;">За последние 24 часа задач нет</div>
             {% endfor %}
-        </div>
-
-        <div>
-            <div class="project-card" style="padding: 20px; border: 1px solid #191919; margin-bottom: 20px;">
-                <h3 style="color: #808080; font-size: 12px; text-transform: uppercase; margin-bottom: 15px;">Прогресс дня</h3>
-                <div style="font-size: 24px; font-weight: bold; color: #fff;">{{ completed_tasks|length }} / {{ active_tasks|length|add:completed_tasks|length }}</div>
-                <div style="font-size: 12px; color: #555; margin-top: 5px;">задач завершено сегодня</div>
-            </div>
-
-            <div class="project-card" style="padding: 20px; border: 1px solid #191919; opacity: 0.6;">
-                <h3 style="color: #808080; font-size: 12px; text-transform: uppercase; margin-bottom: 15px;">Недавно закрыты</h3>
-                {% for task in completed_tasks %}
-                <div style="font-size: 13px; margin-bottom: 8px; text-decoration: line-through; color: #555;">
-                    {{ task.title }}
-                </div>
-                {% endfor %}
-            </div>
         </div>
     </div>
 </div>
+
+<script>
+function completeTask(taskId) {
+    fetch("{% url 'update_task_status' %}", {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+        body: JSON.stringify({ id: taskId, status: 'done' })
+    }).then(response => {
+        if(response.ok) {
+            document.getElementById('task-' + taskId).style.opacity = '0';
+            setTimeout(() => document.getElementById('task-' + taskId).remove(), 300);
+        }
+    });
+}
+</script>
+
 {% endblock %}

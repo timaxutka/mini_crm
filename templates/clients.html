@@ -1,85 +1,197 @@
 {% extends 'base.html' %}
-{% block content %}
-<div class="content">
-    <div class="topbar">
-        <h1>Проекты по клиентам</h1>
-        <div style="flex-grow: 1;"></div>
-        <button class="add-project-btn">+ Новый клиент</button>
-    </div>
+{% load static %}
 
-    <div class="project-card" style="padding: 0; overflow: hidden; border: 1px solid #191919; background-color: #111;">
-        <table style="width: 100%; border-collapse: collapse; color: white; text-align: left;">
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/main.css' %}">
+
+
+
+
+<h1>Проекты по клиентам</h1>
+
+
+
+<div class="search-bar clients-page-search">
+    <img src="{% static 'icons/search.svg' %}" alt="Поиск" class="icon" style="opacity: 0.5; width: 20px;">
+    <input type="text" id="projectSearch" placeholder="Поиск по проекту или клиенту..." onkeyup="filterTable()">
+</div>
+
+    <div class="table-container">
+        <table class="crm-table">
             <thead>
-                <tr style="background-color: #0D0D0D; color: #808080; font-size: 12px; text-transform: uppercase;">
-                    <th style="padding: 20px; width: 20%;">Клиент</th>
-                    <th style="padding: 20px; width: 30%;">Проект</th>
-                    <th style="padding: 20px; width: 15%;">Статус</th>
-                    <th style="padding: 20px; width: 15%;">Бюджет</th>
-                    <th style="padding: 20px; width: 20%;">Оплата</th>
+                <tr>
+                    <th>Клиент 
+                        <button class="sort-btn" onclick="sort(0, this)">
+                            <svg class="sort-icon" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5H7z"/></svg>
+                        </button>
+                    </th>
+                    <th>Проект 
+                        <button class="sort-btn" onclick="sort(0, this)">
+                            <svg class="sort-icon" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5H7z"/></svg>
+                        </button>
+                    </th>
+                    <th>
+                        <select onchange="filterColumn(2, this.value)">
+                            <option value="">Статус</option>
+                            <option value="planned">К выполнению</option>
+                            <option value="inwork">В работе</option>
+                            <option value="done">Завершен</option>
+                            <option value="overdue">Просрочен</option>
+                            <option value="paused">Приостановлен</option>
+                        </select>
+                    </th>
+                    <th>Бюджет 
+                        <button class="sort-btn" onclick="sort(0, this)">
+                            <svg class="sort-icon" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5H7z"/></svg>
+                        </button>
+                    </th>
+                    <th>
+                        <select onchange="filterColumn(4, this.value)">
+                            <option value="">Оплата</option>
+                            <option value="paid">Оплачен</option>
+                            <option value="pending">Ожидает</option>
+                            <option value="not_paid">Не оплачен</option>
+                        </select>
+                    </th>
                 </tr>
             </thead>
-            <tbody style="font-size: 14px;">
+            <tbody>
                 {% for project in projects %}
-                <tr style="border-bottom: 1px solid #191919; transition: background 0.2s;" onmouseover="this.style.backgroundColor='#161616'" onmouseout="this.style.backgroundColor='transparent'">
-                    
-                    <td style="padding: 20px;">
-                        <div style="font-weight: 600; color: #fff;">
-                            {{ project.client.name|default:"Без клиента" }}
+                <tr>
+                    <td class="client-cell">
+                        <div class="client-name">{{ project.client.name|default:"Без клиента" }}</div>
+                        {% if project.client.is_vip %}<span class="vip-tag">★ VIP</span>{% endif %}
+                    </td>
+                    <td class="project-cell">
+                        <a href="{% url 'project_detail' project.id %}" class="project-link">{{ project.title }}</a>
+                        <div class="project-date">
+                            Дедлайн: {% if project.end_date %}{{ project.end_date|date:"d.m.Y" }}{% else %}—{% endif %}
                         </div>
-                        {% if project.client.is_vip %}
-                            <span style="color: #FEC84B; font-size: 10px;">★ VIP</span>
-                        {% endif %}
                     </td>
-
-                    <td style="padding: 20px;">
-                        <a href="{% url 'project_detail' project.id %}" style="color: #7A5AF8; text-decoration: none; font-weight: 500; display: block; margin-bottom: 4px;">
-                            {{ project.title }}
-                        </a>
-                        <span style="font-size: 11px; color: #555;">Создан: {{ project.start_date|date:"d.m.Y" }}</span>
-                    </td>
-
-                    <td style="padding: 20px;">
-                        <span style="padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 500; border: 1px solid;
-                            {% if project.status == 'done' %} background: rgba(95,190,111,0.1); color: #5FBE6F; border-color: #5FBE6F;
-                            {% elif project.status == 'inwork' %} background: rgba(122,90,248,0.1); color: #7A5AF8; border-color: #7A5AF8;
-                            {% elif project.status == 'overdue' %} background: rgba(240,68,56,0.1); color: #F04438; border-color: #F04438;
-                            {% else %} background: rgba(128,128,128,0.1); color: #808080; border-color: #808080; {% endif %}">
+                    <td class="status-cell">
+                        <span class="status-badge {{ project.status }}">
                             {{ project.get_status_display }}
                         </span>
                     </td>
-
-                    <td style="padding: 20px; font-weight: 600;">
+                    <td class="budget-cell">
                         {{ project.budget|default:"0" }} ₽
                     </td>
-
-                    <td style="padding: 20px;">
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            {# Индикатор (кружок) #}
-                            <div style="width: 8px; height: 8px; border-radius: 50%; 
-                                {% if project.payment_status == 'paid' %} background-color: #5FBE6F;
-                                {% elif project.payment_status == 'pending' %} background-color: #FFD700;
-                                {% else %} background-color: #F04438; {% endif %}">
-                            </div>
-                            
-                            {# Текст статуса #}
-                            <span style="font-weight: 500;
-                                {% if project.payment_status == 'paid' %} color: #5FBE6F;
-                                {% elif project.payment_status == 'pending' %} color: #FFD700;
-                                {% else %} color: #F04438; {% endif %}">
-                                {{ project.get_payment_status_display }}
-                            </span>
-                        </div>
+                    <td class="payment-cell">
+                        <div class="payment-indicator {{ project.payment_status }}" title="{{ project.get_payment_status_display }}"></div>
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="5" style="padding: 40px; text-align: center; color: #666;">
-                        Проектов пока нет. Добавьте первый проект и привяжите его к клиенту.
-                    </td>
+                    <td colspan="5" class="empty-row">Проектов пока нет.</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
-</div>
+
+<script>
+function filterTable() {
+    let input = document.getElementById("projectSearch");
+    let filter = input.value.toLowerCase();
+    let table = document.querySelector(".crm-table tbody");
+    let rows = table.getElementsByTagName("tr");
+
+    for (let i = 0; i < rows.length; i++) {
+        // Ищем в первой ячейке (Клиент) и во второй (Проект)
+        let client = rows[i].getElementsByClassName("client-name")[0];
+        let project = rows[i].getElementsByClassName("project-link")[0];
+        
+        if (client || project) {
+            let clientText = client ? client.textContent.toLowerCase() : "";
+            let projectText = project ? project.textContent.toLowerCase() : "";
+            
+            if (clientText.indexOf(filter) > -1 || projectText.indexOf(filter) > -1) {
+                rows[i].style.display = "";
+            } else {
+                rows[i].style.display = "none";
+            }
+        }
+    }
+}
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    let tbody = document.querySelector(".crm-table tbody");
+    // Сохраняем исходные строки в массив при загрузке
+    tbody.dataset.originalRows = JSON.stringify(Array.from(tbody.rows).map(row => row.outerHTML));
+});
+
+// Сортировка
+function sort(colIndex, btn) {
+    let tbody = document.querySelector(".crm-table tbody");
+    let rows = Array.from(tbody.rows);
+    
+    // Получаем текущее состояние кнопки
+    let state = btn.dataset.state || 'none';
+    let nextState = (state === 'none') ? 'asc' : (state === 'asc') ? 'desc' : 'none';
+    
+    // Сброс состояний у всех остальных кнопок
+    document.querySelectorAll('.sort-btn').forEach(b => {
+        if (b !== btn) delete b.dataset.state;
+    });
+
+    // 1. Сброс к исходному
+    if (nextState === 'none') {
+        let original = JSON.parse(tbody.dataset.originalRows);
+        tbody.innerHTML = original.join('');
+    } 
+    // 2. Сортировка
+    else {
+        rows.sort((a, b) => {
+            let valA = a.cells[colIndex].innerText.trim();
+            let valB = b.cells[colIndex].innerText.trim();
+            
+            if(colIndex === 3) { // Бюджет: чистим
+                valA = parseFloat(valA.replace(/[^0-9.-]+/g,"")) || 0;
+                valB = parseFloat(valB.replace(/[^0-9.-]+/g,"")) || 0;
+            }
+            
+            return (nextState === 'asc') ? (valA > valB ? 1 : -1) : (valA < valB ? 1 : -1);
+        });
+        tbody.innerHTML = '';
+        rows.forEach(row => tbody.appendChild(row));
+    }
+    
+    // Сохраняем состояние и обновляем иконку
+    btn.dataset.state = nextState;
+    updateSortIcon(btn.querySelector('.sort-icon'), nextState);
+}
+
+function updateSortIcon(icon, state) {
+    if (state === 'asc') {
+        icon.innerHTML = '<path d="M7 14l5-5 5 5H7z"/>'; // Стрелка вверх
+    } else if (state === 'desc') {
+        icon.innerHTML = '<path d="M7 10l5 5 5-5H7z"/>'; // Стрелка вниз
+    } else {
+        icon.innerHTML = '<path d="M7 10l5 5 5-5H7zM7 14l5-5 5 5H7z"/>'; // Двойная стрелка
+    }
+}
+
+// Фильтрация (Статус/Оплата)
+function filterColumn(colIndex, value) {
+    let rows = document.querySelector(".crm-table tbody").rows;
+    for (let row of rows) {
+        // Получаем конкретный элемент (span или div) в ячейке
+        let targetElement = row.cells[colIndex].querySelector('span, div');
+        
+        if (!targetElement) continue;
+
+        // Получаем все классы элемента как массив
+        let classList = Array.from(targetElement.classList);
+        
+        // Проверяем: если фильтр пуст, показываем всё. 
+        // Иначе проверяем, есть ли класс, который в точности равен значению (например, 'paid')
+        let matches = (value === "" || classList.includes(value));
+        
+        row.style.display = matches ? "" : "none";
+    }
+}
+</script>
+
 {% endblock %}
