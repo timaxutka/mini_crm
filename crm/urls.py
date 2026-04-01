@@ -25,4 +25,8 @@ urlpatterns = [
     path('projects/task/<int:task_id>/edit/', views.edit_task, name='edit_task'),
     path('clients/<int:client_id>/update_field/', views.update_client_field, name='update_client_field'),
     path('clients/<int:client_id>/toggle_vip/', views.toggle_client_vip, name='toggle_client_vip'),
+    path('calculator/create/', views.create_estimate, name='create_estimate'),
+    path('calculator/estimate/<int:estimate_id>/', views.get_estimate_details, name='get_estimate_details'),
+    path('calculator/estimate/<int:estimate_id>/update/', views.update_estimate, name='update_estimate'),
+    path('calculator/estimate/<int:estimate_id>/delete/', views.delete_estimate, name='delete_estimate'),
 ] 

@@ -108,3 +108,28 @@ class Task(models.Model):
         verbose_name = "Задача"
         verbose_name_plural = "Задачи"
         ordering = ['order', 'id'] 
+
+
+class Estimate(models.Model):
+    title = models.CharField(max_length=255, default="Новая смета")
+    created_at = models.DateTimeField(auto_now_add=True)
+    subtotal = models.DecimalField(max_digits=12, decimal_places=2)
+    tax_included = models.BooleanField(default=False)
+    buffer_included = models.BooleanField(default=False)
+    total_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    tags = models.CharField(max_length=255, blank=True, null=True)
+
+    def get_tags_list(self):
+        if self.tags:
+            return [tag.strip() for tag in self.tags.split(',')]
+        return []
+
+    def __str__(self):
+        return f"{self.title} - {self.total_amount} ₽"
+
+class EstimateItem(models.Model):
+    estimate = models.ForeignKey(Estimate, related_name='items', on_delete=models.CASCADE)
+    name = models.CharField(max_length=255)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    quantity = models.IntegerField(default=1)
+    unit = models.CharField(max_length=50, default='fix')

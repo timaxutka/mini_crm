@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Project, Client, Task
+from .models import Project, Client, Task, Estimate, EstimateItem
 
 # Позволяет редактировать задачи прямо внутри страницы проекта
 class TaskInline(admin.TabularInline):
@@ -24,3 +24,12 @@ class ProjectAdmin(admin.ModelAdmin):
 class TaskAdmin(admin.ModelAdmin):
     list_display = ('title', 'project', 'status', 'created_at')
     list_filter = ('status', 'project')
+
+class EstimateItemInline(admin.TabularInline):
+    model = EstimateItem
+    extra = 0
+
+@admin.register(Estimate)
+class EstimateAdmin(admin.ModelAdmin):
+    list_display = ('title', 'total_amount', 'created_at')
+    inlines = [EstimateItemInline]

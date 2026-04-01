@@ -1,0 +1,509 @@
+/* --- ГЛАВНЫЙ ЭКРАН: КАРТОЧКИ --- */
+.calculator-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 40px;
+}
+
+.calc-card {
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+}
+
+.calc-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+}
+
+.calc-card-icon { font-size: 32px; margin-bottom: 16px; }
+.calc-card h3 { font-size: 20px; margin-bottom: 8px; color: var(--text-primary); }
+.calc-card p { font-size: 14px; color: var(--text-secondary); line-height: 1.4; margin-bottom: 24px; }
+.calc-card-cta { font-size: 13px; font-weight: 600; color: #007aff; text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* --- ОБЩИЕ СТИЛИ МОДАЛОК --- */
+.estimate-modal-wide {
+    max-width: 1100px !important;
+    height: 700px !important;
+    padding: 0 !important;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.estimate-modal-wide .modal-header {
+    padding: 24px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.modal-body-split {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+/* --- ЛЕВАЯ ЧАСТЬ: ТАБЛИЦА --- */
+.manual-table-col {
+    flex: 2.2; 
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 32px 40px;
+    overflow-y: auto;
+}
+
+.col-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 24px;
+}
+
+.estimate-builder-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.estimate-builder-table th {
+    text-align: left;
+    font-size: 11px;
+    color: var(--text-secondary);
+    padding: 12px 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    text-transform: uppercase;
+}
+
+.table-input, .table-input-select {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid transparent;
+    color: var(--text-primary);
+    padding: 14px 8px;
+    font-size: 14px;
+    outline: none;
+    transition: 0.2s;
+}
+
+.table-input:focus {
+    border-bottom-color: #007aff;
+    background: rgba(0, 122, 255, 0.03);
+}
+
+.btn-add-line {
+    background: transparent;
+    border: 1px dashed rgba(255, 255, 255, 0.15);
+    color: var(--text-secondary);
+    padding: 12px 20px;
+    border-radius: 12px;
+    margin-top: 20px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-add-line:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+    border-style: solid;
+}
+
+/* --- ПРАВАЯ ЧАСТЬ: ДЕТАЛИЗАЦИЯ --- */
+.receipt-col {
+    flex: 1;
+    padding: 32px 40px;
+    display: flex;
+    flex-direction: column;
+}
+
+.receipt-content-scroll {
+    flex: 1;
+    overflow-y: auto;
+    margin-bottom: 24px;
+    padding-right: 8px;
+}
+
+.receipt-services-ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.receipt-services-ul li {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    font-size: 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+}
+
+/* ФУТЕР (РАСЧЕТЫ) */
+.receipt-footer {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.subtotal-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+}
+
+.receipt-divider {
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    margin: 8px 0 20px 0;
+}
+
+/* КАРТОЧКИ НАЛОГОВ И ЗАПАСА */
+.receipt-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.control-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 14px 16px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.control-card:hover { background: rgba(255, 255, 255, 0.06); }
+
+.control-card:has(input:checked) {
+    background: rgba(0, 122, 255, 0.08);
+    border-color: rgba(0, 122, 255, 0.3);
+}
+
+.control-info { display: flex; flex-direction: column; gap: 2px; }
+.control-title { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.control-subtitle { font-size: 11px; color: var(--text-secondary); }
+
+/* APPLE SWITCH */
+.apple-switch {
+    appearance: none;
+    width: 40px;
+    height: 22px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    position: relative;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.apple-switch::before {
+    content: "";
+    width: 18px;
+    height: 18px;
+    background: #fff;
+    border-radius: 50%;
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    transition: 0.3s;
+}
+
+.apple-switch:checked { background: #34c759; }
+.apple-switch:checked::before { transform: translateX(18px); }
+
+/* ИТОГО */
+.receipt-total-block { margin-bottom: 24px; }
+.total-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+}
+.total-value {
+    font-size: 48px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -2px;
+}
+
+.submit-project-btn { width: 100%; height: 54px; border-radius: 14px; font-weight: 600; }
+
+/* --- СВЕТЛАЯ ТЕМА --- */
+[data-theme="light"] .estimate-modal-wide { background: #fff; }
+[data-theme="light"] .manual-table-col, 
+[data-theme="light"] .estimate-modal-wide .modal-header { border-color: #e5e5ea; }
+[data-theme="light"] .control-card { background: #f2f2f7; border-color: #e5e5ea; }
+[data-theme="light"] .apple-switch { background: #d1d1d6; }
+[data-theme="light"] .receipt-divider { border-color: #e5e5ea; }
+[data-theme="light"] .receipt-services-ul li { border-bottom-color: #f2f2f7; }
+[data-theme="light"] .total-value { color: #000; }
+[data-theme="light"] .table-input, [data-theme="light"] .table-input-select { border-bottom-color: #f2f2f7; color: #000; }
+
+/* КРЕСТИК */
+.close-modal { opacity: 0.5; transition: 0.2s; font-size: 24px; cursor: pointer; }
+.close-modal:hover { opacity: 1; transform: scale(1.1); }
+
+/* Контейнер для кнопок */
+.receipt-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Отступ между кнопками */
+    margin-top: 20px;
+}
+
+/* Базовый стиль для кнопок действий */
+.action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 12px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    
+    /* Твой стандартный темный стиль */
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+/* Состояния для РЕДАКТИРОВАНИЯ */
+.edit-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #fff;
+}
+
+/* Состояния для УДАЛЕНИЯ (красный акцент) */
+.delete-btn:hover {
+    background: rgba(255, 59, 48, 0.1); /* Прозрачный красный */
+    border-color: rgba(255, 59, 48, 0.4);
+    color: #ff453a; /* Светло-красный из палитры Apple */
+}
+
+/* Эффект нажатия (микро-взаимодействие) */
+.action-btn:active {
+    transform: scale(0.98);
+}
+
+/* Фикс для светлой темы, если используешь [data-theme="light"] */
+[data-theme="light"] .action-btn {
+    background: #f2f2f7;
+    border-color: #e5e5ea;
+    color: #444;
+}
+
+[data-theme="light"] .edit-btn:hover {
+    background: #e5e5ea;
+    color: #000;
+}
+
+[data-theme="light"] .delete-btn:hover {
+    background: #ffe5e5;
+    border-color: #ff3b30;
+    color: #ff3b30;
+}
+
+/* --- СТИЛИ ДЛЯ ИНФОРМАЦИИ (НАЗВАНИЕ И ТЕГИ) --- */
+
+.estimate-meta-inputs .col-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+}
+
+/* Базовый стиль инпутов */
+.meta-input {
+    background: rgba(255, 255, 255, 0.03); /* Едва заметный фон */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 14px 16px;
+    color: var(--text-primary);
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+/* Эффект при наведении */
+.meta-input:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Эффект при клике (Фокус) */
+.meta-input:focus {
+    background: rgba(0, 122, 255, 0.05);
+    border-color: #007aff;
+    box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
+}
+
+/* Текст внутри (placeholder) */
+.meta-input::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.5;
+}
+
+/* Специфично для тегов (сделаем текст чуть синим, как акцент) */
+.tags-input {
+    color: #007aff;
+    font-weight: 500;
+}
+
+/* --- СВЕТЛАЯ ТЕМА --- */
+[data-theme="light"] .meta-input {
+    background: #f2f2f7;
+    border-color: #e5e5ea;
+    color: #000;
+}
+
+[data-theme="light"] .meta-input:focus {
+    background: #fff;
+    border-color: #007aff;
+}
+
+[data-theme="light"] .meta-input::placeholder {
+    color: #8e8e93;
+}
+
+/* Контейнер в ячейке таблицы */
+.estimate-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 4px 0;
+}
+
+/* Ссылка-название */
+.project-link {
+    color: var(--text-primary);
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 15px;
+    transition: color 0.2s;
+}
+
+.project-link:hover {
+    color: #007aff;
+}
+
+/* Контейнер для тегов */
+.estimate-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+/* Сами теги */
+.tag-badge {
+    background: rgba(0, 122, 255, 0.1); /* Легкий синий фон */
+    color: #007aff;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: lowercase;
+    border: 1px solid rgba(0, 122, 255, 0.1);
+}
+
+/* Если тегов нет, можно скрыть отступ */
+.estimate-tags:empty {
+    display: none;
+}
+
+@media print {
+    .modal-content {
+        background: white !important;
+        color: black !important;
+    }
+    .tag-badge {
+        border: 1px solid #007aff !important;
+        color: #007aff !important;
+    }
+    /* Скрываем всё лишнее */
+    .close-modal, .receipt-controls {
+        display: none !important;
+    }
+}
+
+/* Фикс для выпадающего списка в темной теме */
+.table-input-select option {
+    background-color: #1c1c1e; /* Темный фон Apple-style */
+    color: white;
+}
+
+/* Сделаем кнопку "+ Добавить строку" на всю ширину, как в дизайне */
+.btn-add-line {
+    width: 100%;
+    display: block;
+    text-align: center;
+}
+
+/* 1. Увеличиваем отступы в ячейках таблицы конструктора */
+.estimate-builder-table td {
+    padding: 12px 8px; /* Добавляем вертикальный отступ самой ячейке */
+    vertical-align: middle;
+}
+
+#deleteConfirmModal .delete-btn:hover {
+    background: #ff3b30 !important; /* Более яркий красный при наведении */
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 69, 58, 0.3);
+}
+
+#deleteConfirmModal .action-btn {
+    height: 48px;
+    font-weight: 600;
+}
+
+.more-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+    background-color: #f5f5f7; /* Светло-серый фон как в macOS */
+    color: #007aff; /* Акцентный синий */
+    border: none;
+    border-radius: 8px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid rgba(0, 122, 255, 0.1);
+}
+
+.more-btn:hover {
+    background-color: #007aff;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 122, 255, 0.2);
+    transform: translateY(-1px);
+}
+
+.more-btn:active {
+    transform: translateY(0);
+    background-color: #005ecb;
+}

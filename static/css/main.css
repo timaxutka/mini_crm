@@ -13,6 +13,7 @@
 @import 'components/finance.css';
 @import 'components/switch.css';
 @import 'components/auth.css';
+@import 'components/calc.css';
 
 body {
     display: flex;

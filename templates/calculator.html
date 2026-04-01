@@ -1,77 +1,381 @@
 {% extends 'base.html' %}
-{% load static %}  {% block content %}
+{% load static %}
+
+{% block content %}
 <link rel="stylesheet" href="{% static 'css/main.css' %}">
+<link rel="stylesheet" href="{% static 'css/modal.css' %}">
+<link rel="stylesheet" href="{% static 'css/calc.css' %}">
 
-
-    <div class="topbar">
-        <h1>Калькулятор стоимости</h1>
-    </div>
-
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
-        
-        <div class="project-card" style="padding: 25px; border: 1px solid #191919;">
-            <h3 style="color: #808080; font-size: 14px; text-transform: uppercase; margin-bottom: 20px;">Параметры работы</h3>
-            
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; font-size: 13px; margin-bottom: 8px;">Желаемый доход в месяц (чистыми), ₽</label>
-                <input type="range" id="desired_income" min="30000" max="500000" step="5000" value="100000" style="width: 100%; accent-color: #7A5AF8;">
-                <div id="income_val" style="text-align: right; color: #7A5AF8; font-weight: bold;">100 000 ₽</div>
-            </div>
-
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; font-size: 13px; margin-bottom: 8px;">Ежемесячные расходы (софт, налоги, связь), ₽</label>
-                <input type="number" id="expenses" value="15000" style="width: 100%; background: #0D0D0D; border: 1px solid #191919; color: white; padding: 10px; border-radius: 4px;">
-            </div>
-
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; font-size: 13px; margin-bottom: 8px;">Сколько часов в неделю вы РЕАЛЬНО работаете?</label>
-                <input type="range" id="hours_week" min="5" max="60" value="25" style="width: 100%; accent-color: #7A5AF8;">
-                <div id="hours_val" style="text-align: right; color: #7A5AF8; font-weight: bold;">25 часов</div>
-            </div>
+<div class="calculator-page">
+    <div class="calculator-grid">
+        <div class="calc-card" onclick="openModal('manualModal')">
+            <div class="calc-card-icon">🧩</div>
+            <h3>Собрать пошагово</h3>
+            <p>Детальный расчет по категориям и конкретным услугам</p>
+            <span class="calc-card-cta">Открыть конструктор →</span>
         </div>
 
-        <div class="project-card" style="padding: 30px; border: 1px solid #7A5AF8; background: rgba(122, 90, 248, 0.05); display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
-            <div style="color: #808080; font-size: 13px; text-transform: uppercase; margin-bottom: 15px;">Ваша минимальная ставка в час:</div>
-            <div id="hourly_rate" style="font-size: 48px; font-weight: bold; color: #fff; margin-bottom: 10px;">0 ₽</div>
-            <p style="font-size: 12px; color: #555; max-width: 250px;">Ниже этой суммы вы работаете в убыток или жертвуете своим уровнем жизни.</p>
-            
-            <hr style="width: 100%; border: 0; border-top: 1px solid #191919; margin: 25px 0;">
-            
-            <div style="width: 100%;">
-                <label style="display: block; font-size: 12px; margin-bottom: 10px; color: #808080;">Оценка конкретного проекта (часов):</label>
-                <input type="number" id="project_hours" value="10" style="width: 100%; background: #0D0D0D; border: 1px solid #191919; color: white; padding: 10px; border-radius: 4px; text-align: center;">
-                <div style="margin-top: 20px; font-size: 18px; color: #808080;">Рекомендуемая цена проекта:</div>
-                <div id="project_total" style="font-size: 32px; font-weight: bold; color: #5FBE6F;">0 ₽</div>
-            </div>
+        <div class="calc-card" onclick="openModal('smartModal')">
+            <div class="calc-card-icon">⚡️</div>
+            <h3>Быстрый набросок</h3>
+            <p>Просто напиши текст — мы сами всё посчитаем</p>
+            <span class="calc-card-cta">Начать печатать →</span>
         </div>
     </div>
 
+    <div class="table-section-header">
+        <h2>Архив смет</h2>
+    </div>
+    
+    <div class="table-container">
+        <table class="crm-table">
+            <thead>
+                <tr>
+                    <th style="width: 40%;">Название и теги</th>
+                    <th style="width: 20%;">Дата создания</th>
+                    <th style="width: 25%;">Бюджет</th>
+                    <th style="width: 15%;">Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if estimates %}
+                    {% for estimate in estimates %}
+                    <tr>
+                        <td>
+                            <div class="estimate-info">
+                                <a href="#" class="project-link" onclick="viewEstimate({{ estimate.id }}); return false;">
+                                    {% if estimate.title %}
+                                        {{ estimate.title }}
+                                    {% else %}
+                                        Смета #{{ estimate.id }}
+                                    {% endif %}
+                                </a>
+                                
+                                <div class="estimate-tags">
+                                    {% if estimate.tags %}
+                                        {% for tag in estimate.get_tags_list %}
+                                            <span class="tag-badge">#{{ tag }}</span>
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="project-date">{{ estimate.created_at|date:"d.m.Y" }}</div>
+                            <div class="project-time" style="font-size: 11px; color: #999;">{{ estimate.created_at|date:"H:i" }}</div>
+                        </td>
+                        <td><span class="budget-cell">{{ estimate.total_amount }} ₽</span></td>
+                        <td class="actions-cell">
+                            <button class="more-btn" onclick="viewEstimate({{ estimate.id }})">Открыть</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                <tr>
+                    <td colspan="4" class="empty-row">У вас пока нет сохраненных смет</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div id="manualModal" class="modal">
+    <div class="modal-content estimate-modal-wide"> 
+        <div class="modal-header">
+            <div class="header-main-row" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <h2>🧩 Конструктор сметы</h2>
+                <span class="close-modal" onclick="closeModal('manualModal')" style="cursor: pointer;">&times;</span>
+            </div>
+        </div>
+
+        <div class="modal-body-split">
+            <div class="modal-col manual-table-col">
+                <div class="estimate-meta-inputs" style="display: flex; gap: 16px; margin-bottom: 32px;">
+                    <div style="flex: 2;">
+                        <div class="col-label">Название проекта</div>
+                        <input type="text" id="estimate-title-input" placeholder="Название сметы..." class="meta-input title-input" style="width: 100%;">
+                    </div>
+                    <div style="flex: 1;">
+                        <div class="col-label">Теги</div>
+                        <input type="text" id="estimate-tags-input" placeholder="дизайн, вкр" class="meta-input tags-input" style="width: 100%;">
+                    </div>
+                </div>
+                <div class="col-label">Состав работ</div>
+                <table class="estimate-builder-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 45%;">Услуга</th>
+                            <th style="width: 20%;">Тип</th>
+                            <th style="width: 20%;">Ставка</th>
+                            <th style="width: 15%;">Кол-во</th>
+                        </tr>
+                    </thead>
+                    <tbody id="estimateRows">
+                        <tr class="estimate-row">
+                            <td><input type="text" class="table-input" placeholder="Название..." oninput="calculateTotal()"></td>
+                            <td>
+                                <select class="table-input-select" onchange="calculateTotal()">
+                                    <option value="fix">Фикса</option>
+                                    <option value="hour">В час</option>
+                                </select>
+                            </td>
+                            <td><input type="number" class="table-input" placeholder="0" oninput="calculateTotal()"></td>
+                            <td><input type="number" class="table-input" value="1" oninput="calculateTotal()"></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <button type="button" class="btn-add-line" onclick="addNewRow()">
+                    <span>+ Добавить строку</span>
+                </button>
+            </div>
+
+            <div class="modal-col receipt-col">
+                <div class="col-label">Детализация</div>
+                <div class="receipt-content-scroll">
+                    <ul id="receiptServiceList" class="receipt-services-ul"></ul>
+                </div>
+                
+                <div class="receipt-footer">
+                
+
+                    <div class="receipt-controls">
+                        <label class="control-card" for="tax-toggle">
+                            <div class="control-info">
+                                <span class="control-title">Налог 6%</span>
+                            </div>
+                            <input type="checkbox" id="tax-toggle" class="apple-switch" onchange="calculateTotal()">
+                        </label>
+                        <label class="control-card" for="buffer-toggle">
+                            <div class="control-info">
+                                <span class="control-title">Риски 15%</span>
+                            </div>
+                            <input type="checkbox" id="buffer-toggle" class="apple-switch" onchange="calculateTotal()">
+                        </label>
+                    </div>
+                    
+                    <div class="receipt-total-block">
+                        <div class="total-label">ИТОГО:</div>
+                        <div class="total-value" id="grandTotal">0 ₽</div>
+                    </div>
+                    <button class="submit-project-btn" onclick="saveManualEstimate()">Сохранить смету</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="smartModal" class="modal">
+    <div class="modal-content" style="max-width: 800px; width: 90%;"> 
+        <div class="modal-header">
+            <h2>⚡️ Умный ввод</h2>
+            <span class="close-modal" onclick="closeModal('smartModal')">&times;</span>
+        </div>
+
+        <div class="form-group" style="margin-top: 20px;">
+            <label style="display: block; margin-bottom: 12px; color: var(--text-secondary);">
+                Введите данные в формате: <b>Название Цена Количество</b> (каждое с новой строки)
+            </label>
+            <textarea id="smart-input" class="smart-textarea" 
+                      style="height: 350px; width: 100%; resize: none; padding: 16px; font-family: monospace; font-size: 15px; border-radius: 12px; border: 1px solid #eee; outline: none;" 
+                      placeholder="Например:&#10;Лендинг 45000 1&#10;Логотип 15000 2&#10;Правки 1000 5"
+                      oninput="parseSmartText()"></textarea>
+            
+            <div id="parsing-hint" class="parsing-hint" style="font-size: 13px; color: var(--text-secondary); margin-top: 12px; padding: 8px 12px; background: #f8f9fa; border-radius: 6px;">
+                Распознано: 0 поз.
+            </div>
+        </div>
+
+        <div class="modal-footer-info" style="display: flex; justify-content: space-between; align-items: center; margin-top: 24px; padding-top: 20px; border-top: 1px solid #eee;">
+            <div class="total-display">
+                <div style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">Предварительный итог:</div>
+                <div class="total-amount" id="smartTotal" style="font-size: 28px; font-weight: 700; color: var(--text-primary);">0 ₽</div>
+            </div>
+            <button class="submit-project-btn" style="width: auto; padding: 0 40px; height: 52px;" onclick="saveSmartEstimate()">
+                Продолжить в конструкторе →
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="viewEstimateModal" class="modal">
+    <div class="modal-content estimate-modal-wide"> 
+        <div class="modal-header">
+            <h2 id="view-estimate-title">Детализация сметы</h2>
+            <span class="close-modal" onclick="closeModal('viewEstimateModal')">&times;</span>
+        </div>
+        <div class="modal-body-split">
+            <div class="manual-table-col">
+                <table class="estimate-builder-table">
+                    <thead>
+                        <tr>
+                            <th>Услуга</th>
+                            <th>Тип</th>
+                            <th>Цена</th>
+                            <th>Кол-во</th>
+                            <th>Итого</th>
+                        </tr>
+                    </thead>
+                    <tbody id="view-estimate-items">
+                        </tbody>
+                </table>
+            </div>
+            
+            <div class="receipt-col">
+                <div class="receipt-footer">
+                    <div class="receipt-total-block" style="margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid #eee;">
+                        <div class="total-label" style="font-size: 11px; letter-spacing: 1px;">ФИНАЛЬНАЯ СТОИМОСТЬ:</div>
+                        <div class="total-value" id="view-grand-total" style="font-size: 32px; color: #000;">0 ₽</div>
+                    </div>
+
+                    <div class="receipt-controls">
+                        <button class="submit-project-btn" onclick="exportToPDF()" style="margin-bottom: 8px;">
+                            <span>📄 Экспорт в PDF</span>
+                        </button>
+                        
+                        <button class="action-btn edit-btn" onclick="editEstimate()">
+                            <span>✏️ Редактировать</span>
+                        </button>
+                        
+                        <button class="action-btn delete-btn" onclick="deleteEstimate()">
+                            <span>🗑️ Удалить</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div style="display: none;">
+    <div id="pdf-template" style="padding: 40px; font-family: 'Helvetica', 'Arial', sans-serif; color: #000; background: #fff;">
+        <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 20px; margin-bottom: 30px;">
+            <div>
+                <h1 style="margin: 0; font-size: 24px; text-transform: uppercase;">Смета на разработку</h1>
+                <p id="pdf-estimate-title" style="font-size: 18px; color: #444; margin: 5px 0;"></p>
+            </div>
+            <div style="text-align: right;">
+                <div style="font-weight: bold; font-size: 16px;">Maksim Timofeev</div>
+                <p style="font-size: 12px; color: #666; margin: 2px 0;">UI/UX & Web Development</p>
+                <p id="pdf-date" style="font-size: 12px; margin: 2px 0;"></p>
+            </div>
+        </div>
+
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+            <thead>
+                <tr style="background: #f5f5f7;">
+                    <th style="border: 1px solid #ddd; padding: 10px; text-align: left;">Наименование работ</th>
+                    <th style="border: 1px solid #ddd; padding: 10px; text-align: center; width: 80px;">Кол-во</th>
+                    <th style="border: 1px solid #ddd; padding: 10px; text-align: right; width: 120px;">Цена</th>
+                    <th style="border: 1px solid #ddd; padding: 10px; text-align: right; width: 120px;">Итого</th>
+                </tr>
+            </thead>
+            <tbody id="pdf-items-body">
+                </tbody>
+        </table>
+
+        <div style="display: flex; justify-content: flex-end;">
+            <div style="width: 250px;">
+                <div style="display: flex; justify-content: space-between; padding: 5px 0;">
+                    <span>Промежуточный итог:</span>
+                    <span id="pdf-subtotal">0 ₽</span>
+                </div>
+                <div id="pdf-tax-row" style="display: flex; justify-content: space-between; padding: 5px 0; display: none;">
+                    <span>Налог (6%):</span>
+                    <span id="pdf-tax-val">0 ₽</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 10px 0; border-top: 2px solid #000; font-weight: bold; font-size: 18px; margin-top: 10px;">
+                    <span>ИТОГО:</span>
+                    <span id="pdf-grand-total">0 ₽</span>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: 50px; font-size: 12px; color: #888; border-top: 1px solid #eee; padding-top: 20px;">
+            <p>Смета действительна в течение 14 дней. Данный документ не является публичной офертой.</p>
+        </div>
+    </div>
+</div>
+
+<div id="deleteConfirmModal" class="modal" style="z-index: 1001;">
+    <div class="modal-content" style="max-width: 400px; text-align: center; padding: 32px;">
+        <div style="font-size: 48px; margin-bottom: 16px;">🗑️</div>
+        <h3 style="margin-bottom: 12px; font-size: 20px;">Удалить смету?</h3>
+        <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 24px; line-height: 1.5;">
+            Это действие нельзя будет отменить. Смета «<span id="delete-target-title" style="color: var(--text-primary); font-weight: 600;"></span>» исчезнет из архива навсегда.
+        </p>
+        <div style="display: flex; gap: 12px;">
+            <button class="action-btn" onclick="closeModal('deleteConfirmModal')" style="flex: 1;">Отмена</button>
+            <button class="action-btn delete-btn" onclick="confirmDeleteExecution()" style="flex: 1; background: #ff453a; color: white; border: none;">Удалить</button>
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'js/calc.js' %}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <script>
-function calculate() {
-    const income = parseFloat(document.getElementById('desired_income').value);
-    const expenses = parseFloat(document.getElementById('expenses').value);
-    const hoursWeek = parseFloat(document.getElementById('hours_week').value);
-    const projectHours = parseFloat(document.getElementById('project_hours').value);
+function saveSmartEstimate() {
+    console.log("--- START SMART PARSING ---");
 
-    // Обновляем текст ползунков
-    document.getElementById('income_val').innerText = income.toLocaleString() + ' ₽';
-    document.getElementById('hours_val').innerText = hoursWeek + ' часов';
+    const textarea = document.getElementById('smart-input');
+    const manualModal = document.getElementById('manualModal');
+    const tbody = document.getElementById('estimateRows');
 
-    // Формула: (Доход + Расходы) / (Часы в неделю * 4 недели)
-    const monthlyHours = hoursWeek * 4;
-    const rate = (income + expenses) / monthlyHours;
-    
-    document.getElementById('hourly_rate').innerText = Math.round(rate).toLocaleString() + ' ₽';
-    document.getElementById('project_total').innerText = Math.round(rate * projectHours).toLocaleString() + ' ₽';
+    if (!textarea || !tbody) return;
+
+    const lines = textarea.value.split('\n').filter(line => line.trim() !== '');
+    if (lines.length === 0) return alert("Введите данные");
+
+    // 1. Очищаем таблицу
+    tbody.innerHTML = '';
+
+    lines.forEach(line => {
+        const numbers = line.match(/\d+/g);
+        if (numbers) {
+            const firstDigitIndex = line.search(/\d/);
+            const name = firstDigitIndex !== -1 ? line.substring(0, firstDigitIndex).trim() : line.trim();
+            const price = numbers.length >= 2 ? parseFloat(numbers[numbers.length - 2]) : parseFloat(numbers[0]);
+            const qty = numbers.length >= 2 ? parseFloat(numbers[numbers.length - 1]) : 1;
+
+            const tr = document.createElement('tr');
+            tr.className = 'estimate-row';
+            tr.innerHTML = `
+                <td><input type="text" class="table-input" value="${name || 'Услуга'}" oninput="calculateTotal()"></td>
+                <td>
+                    <select class="table-input-select" onchange="calculateTotal()">
+                        <option value="fix">Фикса</option>
+                        <option value="hour">В час</option>
+                    </select>
+                </td>
+                <td><input type="number" class="table-input" value="${price}" oninput="calculateTotal()"></td>
+                <td><input type="number" class="table-input" value="${qty}" oninput="calculateTotal()"></td>
+                <td><button type="button" onclick="this.closest('tr').remove(); calculateTotal();" style="border:none; background:none; cursor:pointer;">&times;</button></td>
+            `;
+            tbody.appendChild(tr);
+        }
+    });
+
+    // 2. ХАК: Временно ставим ID, чтобы resetManualForm() НЕ СРАБОТАЛ при открытии
+    currentEditingEstimateId = "smart_temp"; 
+
+    // 3. Заполняем мета-данные
+    document.getElementById('estimate-title-input').value = "Смета из умного ввода";
+    document.getElementById('estimate-tags-input').value = "быстрый ввод";
+
+    // 4. Переключаем модалки
+    if (window.closeModal) window.closeModal('smartModal');
+    if (window.openModal) window.openModal('manualModal');
+
+    // 5. ОЧИЩАЕМ ХАК обратно через мгновение, чтобы сохранение работало как создание новой
+    setTimeout(() => {
+        currentEditingEstimateId = null;
+        if (window.calculateTotal) window.calculateTotal();
+        console.log("Данные зафиксированы, форма защищена от сброса");
+    }, 100);
+
+    textarea.value = '';
 }
-
-// Слушаем изменения
-document.querySelectorAll('input').forEach(input => {
-    input.addEventListener('input', calculate);
-});
-
-// Первый расчет при загрузке
-calculate();
 </script>
 {% endblock %}

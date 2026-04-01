@@ -12,7 +12,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 from django.db.models.functions import TruncDay, TruncMonth
 
-from .models import Project, Client, Task
+from .models import Project, Client, Task, Estimate, EstimateItem
 
 from django.contrib.auth.views import LoginView
 
@@ -259,7 +259,12 @@ def toggle_client_vip(request, client_id):
     client.save()
     return JsonResponse({'success': True, 'is_vip': client.is_vip})
 
-def calculator(request): return render(request, 'calculator.html')
+# Найти и заменить:
+def calculator(request):
+    # Достаем все сметы, свежие — сверху
+    estimates = Estimate.objects.all().order_by('-created_at')
+    return render(request, 'calculator.html', {'estimates': estimates})
+
 def settings(request): return render(request, 'settings.html')
 
 class MyLoginView(LoginView):
@@ -271,3 +276,110 @@ def kanban_view(request):
     # Тут будет логика получения данных из БД
     # Пока просто отдаем твой HTML-шаблон
     return render(request, 'projects.html')
+
+def create_estimate(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            now = timezone.now()
+            
+            # 1. ЗАБИРАЕМ ДАННЫЕ ИЗ ЗАПРОСА
+            user_title = data.get('title', '').strip()
+            user_tags = data.get('tags', '').strip()
+
+            # 2. ОПРЕДЕЛЯЕМ НАЗВАНИЕ (если ввели — берем его, если нет — ставим дату)
+            final_title = user_title if user_title else f"Смета от {now.strftime('%d.%m.%Y %H:%M')}"
+
+            # 3. СОХРАНЯЕМ В БАЗУ
+            estimate = Estimate.objects.create(
+                title=final_title,
+                tags=user_tags,  # Теперь теги будут сохраняться!
+                subtotal=Decimal(str(data.get('subtotal', 0))),
+                tax_included=data.get('tax', False),
+                buffer_included=data.get('buffer', False),
+                total_amount=Decimal(str(data.get('total', 0)))
+            )
+
+            for item in data.get('items', []):
+                EstimateItem.objects.create(
+                    estimate=estimate,
+                    name=item['name'],
+                    unit=item['unit'],
+                    price=Decimal(str(item['price'])),
+                    quantity=item['qty']
+                )
+
+            return JsonResponse({
+                'status': 'success', 
+                'id': estimate.id,
+                'title': estimate.title,
+                'tags': estimate.tags,
+                'total': float(estimate.total_amount),
+                'date': estimate.created_at.strftime('%d %b %Y')
+            })
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+        
+def get_estimate_details(request, estimate_id):
+    estimate = get_object_or_404(Estimate, id=estimate_id)
+    items = estimate.items.all()
+    
+    items_data = []
+    for item in items:
+        items_data.append({
+            'name': item.name,
+            'unit': item.unit,
+            'price': float(item.price),
+            'quantity': item.quantity,
+        })
+        
+    return JsonResponse({
+        'status': 'success',
+        'title': estimate.title,
+        'tags': estimate.tags,             # ДОБАВИЛИ ТЕГИ
+        'tax': estimate.tax_included,      # ДОБАВИЛИ НАЛОГ
+        'buffer': estimate.buffer_included, # ДОБАВИЛИ РИСКИ
+        'total': float(estimate.total_amount),
+        'items': items_data
+    })
+
+@require_POST
+def update_estimate(request, estimate_id):
+    try:
+        estimate = get_object_or_404(Estimate, id=estimate_id)
+        data = json.loads(request.body)
+        
+        # Обновляем основные поля
+        estimate.title = data.get('title', estimate.title)
+        estimate.tags = data.get('tags', estimate.tags)
+        estimate.subtotal = Decimal(str(data.get('subtotal', 0)))
+        estimate.tax_included = data.get('tax', False)
+        estimate.buffer_included = data.get('buffer', False)
+        estimate.total_amount = Decimal(str(data.get('total', 0)))
+        estimate.save()
+
+        # Удаляем старые айтемы и создаем новые (проще, чем сверять изменения)
+        estimate.items.all().delete()
+        for item in data.get('items', []):
+            EstimateItem.objects.create(
+                estimate=estimate,
+                name=item['name'],
+                unit=item['unit'],
+                price=Decimal(str(item['price'])),
+                quantity=item['qty']
+            )
+
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+    
+@require_POST
+def delete_estimate(request, estimate_id):
+    # Находим смету, проверяя, что она принадлежит текущему пользователю (если есть авторизация)
+    estimate = get_object_or_404(Estimate, id=estimate_id)
+    
+    try:
+        estimate.delete()
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
