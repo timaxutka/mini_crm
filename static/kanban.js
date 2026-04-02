@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (statusInput) statusInput.value = btn.dataset.status;
                 if (modal) { modal.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
             });
-        });
+        }); 
 
         addProjectForm.addEventListener('submit', (e) => {
             e.preventDefault();

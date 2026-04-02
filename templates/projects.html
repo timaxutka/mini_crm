@@ -125,6 +125,20 @@
             <input type="hidden" id="modalStatus" name="status" value="planned">
             
             <div class="form-group">
+                <label>Привязать смету</label>
+                <select name="estimate_id" id="estimate_select" class="meta-input" style="width: 100%; margin-bottom: 10px;">
+                    <option value="">-- Выберите смету (необязательно) --</option>
+                    {% for est in estimates %}
+                        <option value="{{ est.id }}" 
+                                data-title="{{ est.title }}" 
+                                data-total="{{ est.total_amount }}">
+                            {{ est.title }} ({{ est.total_amount }} ₽)
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
                 <label>Название проекта</label>
                 <input type="text" name="title" placeholder="Введите название" required>
             </div>
@@ -207,6 +221,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (totalDisplay) {
         observer.observe(totalDisplay, { childList: true, characterData: true, subtree: true });
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const estimateSelect = document.getElementById('estimate_select');
+    const titleInput = document.querySelector('input[name="title"]');
+    const budgetInput = document.querySelector('input[name="budget"]');
+
+    if (estimateSelect) {
+        estimateSelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            
+            // Если выбрали конкретную смету (а не пустую строку)
+            if (selectedOption.value !== "") {
+                const estTitle = selectedOption.getAttribute('data-title');
+                const estTotal = selectedOption.getAttribute('data-total');
+
+                // Автозаполнение
+                if (titleInput) titleInput.value = estTitle;
+                if (budgetInput) budgetInput.value = estTotal;
+                
+                // Визуальный отклик (подсветим поля, что они заполнились сами)
+                [titleInput, budgetInput].forEach(el => {
+                    el.style.transition = "background-color 0.5s";
+                    el.style.backgroundColor = "#e8f0fe";
+                    setTimeout(() => el.style.backgroundColor = "white", 500);
+                });
+            } else {
+                // Если сбросили выбор сметы — очищаем поля (опционально)
+                titleInput.value = "";
+                budgetInput.value = "";
+            }
+        });
     }
 });
 </script>

@@ -24,12 +24,15 @@ def projects(request):
     done    = Project.objects.filter(status='done').order_by('order', 'id')
     overdue = Project.objects.filter(status='overdue').order_by('order', 'id')
     paused  = Project.objects.filter(status='paused').order_by('order', 'id')
+    estimates = Estimate.objects.all().order_by('-created_at')
+
     return render(request, 'projects.html', {
         'planned': planned,
         'inwork': inwork,
         'done': done,
         'overdue': overdue,
         'paused': paused,
+        'estimates': estimates,
     })
 
 def client_projects_view(request):
@@ -110,6 +113,7 @@ def add_project_ajax(request):
     if request.method == 'POST':
         title = request.POST.get('title')
         status = request.POST.get('status', 'planned')
+        estimate_id = request.POST.get('estimate_id')
         
         # Решаем проблему ценника: пробуем взять 'budget', если пусто — 'cost'
         budget_raw = request.POST.get('budget') or request.POST.get('cost') or '0'
@@ -135,8 +139,18 @@ def add_project_ajax(request):
             status=status,
             budget=budget,
             end_date=deadline_raw if deadline_raw else None,
-            client=client
+            client=client,
+            estimate_id=estimate_id if (estimate_id and estimate_id.isdigit()) else None
         )
+
+        if project.estimate_id:
+            try:
+                estimate = Estimate.objects.get(id=project.estimate_id)
+                convert_estimate_to_tasks(project, estimate)
+            except Estimate.DoesNotExist:
+                pass
+
+            return JsonResponse({'success': True, 'id': project.id})
 
         # Возвращаем JSON строго в старом формате
         return JsonResponse({
@@ -383,3 +397,23 @@ def delete_estimate(request, estimate_id):
         return JsonResponse({'status': 'success'})
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+    
+def convert_estimate_to_tasks(project, estimate):
+    """
+    Берет позиции из сметы и создает задачи для проекта.
+    """
+    items = estimate.items.all()
+    new_tasks = []
+    
+    for index, item in enumerate(items):
+        new_tasks.append(Task(
+            project=project,
+            title=item.name,
+            # ВАЖНО: Ставим 'planned', чтобы они попали в первую колонку канбана
+            status='planned', 
+            order=index
+        ))
+    
+    # bulk_create быстрее, чем создавать по одной в цикле
+    Task.objects.bulk_create(new_tasks)
+    return len(new_tasks)

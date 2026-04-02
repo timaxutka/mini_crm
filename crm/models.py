@@ -56,6 +56,15 @@ class Project(models.Model):
 
     order = models.PositiveIntegerField(default=0, verbose_name="Позиция")
 
+    estimate = models.ForeignKey(
+        'Estimate', 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='projects',
+        verbose_name="Основание (смета)"
+    )
+
     def save(self, *args, **kwargs):
         if self._state.adding and self.order == 0:
             max_order = Project.objects.filter(status=self.status).aggregate(models.Max('order'))['order__max'] or 0
