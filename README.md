@@ -21,4 +21,16 @@
 - Современный **интерфейс в тёмной теме**, основанный на чистом UI/UX-дизайне.  
 - Удобный **drag-and-drop** функционал (Kanban-доска).  
 - Минимум лишнего кода — чистая архитектура **Django + HTML/CSS/JS**.  
-- Простая структура БД:  
+- Простая структура БД:
+- 
+<img width="3420" height="2224" alt="1" src="https://github.com/user-attachments/assets/5c3de8cf-5e2c-435d-b9d7-459065870304" />
+
+<img width="3420" height="2224" alt="2" src="https://github.com/user-attachments/assets/4db28c19-effb-481f-9005-1c7202330a38" />
+
+<img width="3420" height="2224" alt="3" src="https://github.com/user-attachments/assets/af67152b-b849-43ee-bcc9-74501233ac08" />
+
+<img width="3420" height="2224" alt="4" src="https://github.com/user-attachments/assets/8c219066-2882-4d55-bf80-ace34bd5d98f" />
+
+<img width="3420" height="2224" alt="5" src="https://github.com/user-attachments/assets/2a23242e-6c14-41c9-91f9-519e6b4cbbb9" />
+
+
